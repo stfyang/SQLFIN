@@ -6,10 +6,71 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <script src="jump.js" defer></script>
+    <script src="menu.html" defer></script>
 </head>
 <body>
     <h1>這是菜單</h1>
-    <button class="button is-small is-info" onclick="首頁()">首頁</button>
+<!-- 新增菜單按鈕 -->
+<button class="button is-primary" id="openModalBtn">新增菜單</button>
 
+<!-- Modal 結構 -->
+<div class="modal" id="menuModal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">新增菜單</p>
+      <button class="delete" aria-label="close" id="closeModalBtn"></button>
+    </header>
+    <section class="modal-card-body">
+      <!-- 表單內容 -->
+      <div class="field">
+        <label class="label">菜名</label>
+        <div class="control">
+          <input class="input" type="text" placeholder="請輸入菜名" id="dishName">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">價格</label>
+        <div class="control">
+          <input class="input" type="number" placeholder="請輸入價格" id="dishPrice">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">食材</label>
+        <div class="control">
+          <input class="input" type="text" placeholder="輸入食材，例如：雞肉*1, 洋蔥*0.5" id="ingredients">
+        </div>
+        <p class="help">格式範例：雞肉*1, 洋蔥*0.5</p>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" id="submitMenuBtn">完成</button>
+      <button class="button" id="cancelModalBtn">取消</button>
+    </footer>
+  </div>
+</div>
+<br>
+    <button class="button is-small is-info" onclick="首頁()">首頁</button>
+<script>  // 找到元素
+  const modal = document.getElementById('menuModal');
+  const openBtn = document.getElementById('openModalBtn');
+  const closeBtn = document.getElementById('closeModalBtn');
+  const cancelBtn = document.getElementById('cancelModalBtn');
+
+  // 打開視窗
+  openBtn.addEventListener('click', () => {
+    modal.classList.add('is-active');
+  });
+
+  // 關閉視窗
+  closeBtn.addEventListener('click', () => {
+    modal.classList.remove('is-active');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    modal.classList.remove('is-active');
+  });</script>
 </body>
 </html>
