@@ -1,30 +1,130 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>餐廳管理系統</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <script src="jump.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+   <script src="jump.js" defer></script>
+   <style>
+        body {
+            background-image: url('背景圖.jpg'); /* ← 放你的背景圖檔名 */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 0;
+        }
+
+            body::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(255, 255, 255, 0.5); /* ← 控制背景淡化程度 */
+                z-index: -1;
+            }
+
+        .menu-container {
+            background-color: white; /* ← 不透明純白 */
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #222;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .menu-button {
+            background-color: #ffe164;
+            border: 2px solid #333;
+            border-radius: 1rem;
+            text-align: center;
+            padding: 2.5rem 1rem;
+            margin: 1rem;
+            font-size: 1.8rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+            .menu-button:hover {
+                background-color: #ffd700;
+                transform: scale(1.05);
+            }
+
+            .menu-button i {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+
+        .bottom-right-time {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+    </style>
 </head>
 <body>
-    <section class="section">
-        <div class="container">
-          <h1 class="title">巴拉巴拉餐廳</h1>
+    <div class="menu-container has-text-centered">
+        <div class="title">餐廳管理系統</div>
+        <div class="menu-grid">
+             <div class="menu-button" onclick="點餐(event)">
+                <i class="fas fa-pen"></i><br>點餐功能
+            </div>
+            <div class="menu-button" onclick="庫存(event)">
+                <i class="fas fa-warehouse"></i><br>庫存功能
+            </div>
+            <div class="menu-button" onclick="進貨(event)">
+                <i class="fas fa-dolly"></i><br>進貨管理功能
+            </div>
+            <div class="menu-button" onclick="菜單(event)">
+                <i class="fas fa-utensils"></i><br>菜單功能
+            </div>
+            <div class="menu-button" onclick="供應商(event)">
+                <i class="fas fa-user-tie"></i><br>供應商管理功能
+            </div>
+            <div class="menu-button" onclick="營運分析(event)">
+                <i class="fas fa-chart-line"></i><br>營運分析
+            </div>
         </div>
-    </section>
-    <div>
-     
-          <button class="button is-small is-info" onclick="點餐()">點餐</button>
-          <button class="button is-small is-danger" onclick="庫存()">庫存</button>
-          <button class="button is-small is-danger" onclick="菜單()">菜單</button>
-          <button class="button is-small is-danger" onclick="進貨()">進貨</button>
-          <button class="button is-small is-danger" onclick="供應商()">供應商</button>
-          <button class="button is-small is-danger" onclick="營運分析()">營運分析</button>
-     
-         
-  </div>
- 
-  
+    </div>
+
+    <div class="bottom-right-time" id="time"></div>
+
+    <script>
+    function updateTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('time').innerText = `${hours}:${minutes}`;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+    </script>
+
 </body>
 </html>
+
+
+
+
