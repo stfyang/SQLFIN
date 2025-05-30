@@ -5,6 +5,9 @@
   <title>供應商管理功能</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <script src="jump.js" defer></script>
+  <script src="add_idn.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
   <style>
     body {
@@ -91,7 +94,7 @@
   <div class="menu-container has-text-centered">
     <div class="title">供應商管理功能</div>
     <div class="menu-grid">
-      <div class="menu-button" onclick="alert('新增供應商')">
+      <div class="menu-button" id="openAddSupplierBtn">
         <i class="fas fa-plus"></i><br>新增供應商
       </div>
       <div class="menu-button" onclick="alert('查詢供應商')">
@@ -119,7 +122,35 @@
     updateTime();
   </script>
       <button class="button is-small is-info" onclick="首頁()">首頁</button>
-
+<!-- 新增供應商 Modal -->
+  <div class="modal" id="addSupplierModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">新增供應商</p>
+        <button class="delete" aria-label="close" id="closeModalBtn"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">供應商名稱</label>
+          <div class="control">
+            <input class="input" type="text" id="supplierName" placeholder="請輸入名稱">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">電話</label>
+          <div class="control">
+            <input class="input" type="text" id="supplierPhone" placeholder="請輸入電話">
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-success" id="saveSupplierBtn">儲存</button>
+        <button class="button" id="cancelModalBtn">取消</button>
+      </footer>
+    </div>
+  </div>
+  
 </body>
 </html>
 
