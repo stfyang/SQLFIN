@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>查詢供應商</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="query_idn.js"></script>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">供應商列表</h1>
+
+      <!-- 查詢欄位 -->
+      <div class="field has-addons">
+        <div class="control">
+          <input id="searchInput" class="input" type="text" placeholder="輸入供應商名稱查詢">
+        </div>
+        <div class="control">
+          <button id="searchBtn" class="button is-info">查詢</button>
+        </div>
+      </div>
+
+      <!-- 顯示結果 -->
+      <table class="table is-striped is-fullwidth">
+        <thead>
+          <tr>
+            <th>名稱</th>
+            <th>電話</th>
+          </tr>
+        </thead>
+        <tbody id="supplierTableBody">
+          <!-- 資料列會動態產生 -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const tableBody = document.getElementById('supplierTableBody');
+
+      function fetchSuppliers(name = '') {
+        axios.post('query-idn.php', { name })
+          .then(res => {
+            tableBody.innerHTML = ''; // 清空表格
+            const data = res.data;
+
+            if (!Array.isArray(data)) {
+              alert('資料格式錯誤');
+              console.error(data);
+              return;
+            }
+
+            if (data.length === 0) {
+              tableBody.innerHTML = '<tr><td colspan="2">查無資料</td></tr>';
+            } else {
+              data.forEach(supplier => {
+                const row = `<tr><td>${supplier.名稱}</td><td>${supplier.電話}</td></tr>`;
+                tableBody.innerHTML += row;
+              });
+            }
+          })
+          .catch(err => {
+            alert('查詢失敗');
+            console.error(err);
+          });
+      }
+
+      // 初始載入全部
+      fetchSuppliers();
+
+      // 按下查詢按鈕
+      searchBtn.addEventListener('click', () => {
+        const name = searchInput.value.trim();
+        fetchSuppliers(name);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById('closeModalBtn');
   const cancelBtn = document.getElementById('cancelModalBtn');
   const saveBtn = document.getElementById('saveSupplierBtn');
+  const queryBtn = document.getElementById('querySupplierBtn'); // 🔍 新增查詢按鈕
 
   openBtn.addEventListener('click', () => modal.classList.add('is-active'));
   closeBtn.addEventListener('click', () => modal.classList.remove('is-active'));
@@ -31,13 +32,37 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 
-  // 時間顯示
+  // 🔍 查詢供應商功能
+  queryBtn.addEventListener('click', () => {
+    const name = document.getElementById('supplierName').value.trim();
+
+    if (!name) {
+      alert('請輸入要查詢的供應商名稱');
+      return;
+    }
+
+    axios.post('query-idn.php', { name })
+      .then(res => {
+        if (res.data.length > 0) {
+          const supplier = res.data[0]; // 假設只取第一筆
+          alert(`供應商：${supplier.名稱}\n電話：${supplier.電話}`);
+        } else {
+          alert('查無資料');
+        }
+      })
+      .catch(err => {
+        alert('查詢失敗');
+        console.error(err);
+      });
+  });
+
   function updateTime() {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     document.getElementById('time').innerText = `${hours}:${minutes}`;
   }
+
   setInterval(updateTime, 1000);
   updateTime();
 });

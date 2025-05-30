@@ -17,10 +17,14 @@ function 點餐() {
   function 營運分析() {
     window.location.href = "an.html"; 
   }
-  function 新增供應商() {
-    window.location.href = "an.html"; 
-  }
+  
   function 首頁() {
     window.location.href = "index.html"; 
 
   }
+  document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('querySupplierBtn');
+  btn.addEventListener('click', () => {
+    window.location.href = 'queryidn.html';
+  });
+});
