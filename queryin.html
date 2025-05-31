@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>查詢進貨單</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="queryin.js"></script>
+
+  <link rel="stylesheet" href="book.css">
+
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">進貨單列表</h1>
+
+      <!-- 查詢欄位 -->
+      <div class="field has-addons">
+        <div class="control">
+          <input id="searchInput" class="input" type="text" placeholder="輸入供應商名稱查詢">
+        </div>
+        <div class="control">
+          <button id="searchBtn" class="button is-info">查詢</button>
+        </div>
+      </div>
+
+      <!-- 顯示結果 -->
+      <table class="table is-striped is-fullwidth">
+      <thead>
+  <tr>
+    <th>id</th>
+    <th>時間</th>
+    <th>供應商名稱</th>
+    <th>原料</th>
+    <th>數量</th>
+    <th>操作</th> <!-- ✅ 修改按鈕 -->
+  </tr>
+</thead>
+<tbody id="purchaseTableBody">
+  <!-- 資料列會由 JavaScript 動態產生 -->
+</tbody>
+
+      </table>
+    </div>
+  </section>
+
+
+  <!-- 修改 Modal -->
+  <div id="editSinModal" class="modal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">修改進貨單</p>
+      <button class="delete" aria-label="close" id="closeEditModalBtn"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="field">
+        <label class="label">編號（不可修改）</label>
+        <div class="control">
+          <input id="editinName" class="input" type="text" readonly>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">原物料</label>
+        <div class="control">
+          <input id="editMaterial" class="input" type="text">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">數量</label>
+        <div class="control">
+          <input id="editQuantity" class="input" type="number">
+        </div>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button id="saveEditBtn" class="button is-success">儲存</button>
+      <button id="cancelEditModalBtn" class="button">取消</button>
+    </footer>
+  </div>
+</div>
+
+  <a href="index.html" class="button is-small is-dark home-button">
+        <i class="fas fa-home"></i>&nbsp;
+        首頁
+    </a>
+</body>
+</html>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>庫存功能</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
    <script src="jump.js" defer></script>
    <link rel="stylesheet" href="book.css">
@@ -14,10 +16,10 @@
     <div class="menu-container has-text-centered">
         <div class="title">庫存功能</div>
         <div class="menu-grid">
-            <div class="menu-button" onclick="alert('新增庫存')">
+            <div class="menu-button" onclick="document.getElementById('addStockModal').classList.add('is-active')">
                 <i class="fas fa-plus"></i><br>新增庫存
             </div>
-            <div class="menu-button" onclick="alert('查詢庫存')">
+            <div class="menu-button" onclick="window.location.href='query-sto.html'">
                 <i class="fas fa-search"></i><br>查詢庫存
             </div>
             <div class="menu-button" onclick="alert('修改庫存')">
@@ -35,20 +37,95 @@
     <div class="bottom-right-time" id="time"></div>
 
     <script>
-    function updateTime() {
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      document.getElementById('time').innerText = `${hours}:${minutes}`;
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function closeModal() {
+            document.getElementById('addStockModal').classList.remove('is-active');
+            document.getElementById('stockMsgBox').style.display = 'none';
+        }
+
+        function submitAddStock() {
+    const name = document.getElementById('name').value.trim();
+    const category = document.getElementById('category').value.trim();
+    const safe_quantity = parseInt(document.getElementById('safe_quantity').value);
+    const quantity = parseInt(document.getElementById('quantity').value);
+
+    axios.post('add-stock.php', {
+        name, category, safe_quantity, quantity
+    }, {
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => {
+        const box = document.getElementById('stockMsgBox');
+        box.innerText = res.data.message || '新增成功';
+        box.className = 'notification is-success is-light';
+        box.style.display = 'block';
+
+        // ✅ 顯示訊息後延遲 1 秒關閉 modal
+        setTimeout(() => {
+            closeModal(); // 關閉 modal
+            // 清空欄位
+            document.getElementById('name').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('safe_quantity').value = '';
+            document.getElementById('quantity').value = '';
+        }, 1000);
+    })
+    .catch(err => {
+        const box = document.getElementById('stockMsgBox');
+        box.innerText = '新增失敗';
+        box.className = 'notification is-danger is-light';
+        box.style.display = 'block';
+        console.error(err);
+    });
+}
+
     </script>
-       <a href="index.html" class="button is-small is-dark home-button">
+    <a href="index.html" class="button is-small is-dark home-button">
         <i class="fas fa-home"></i>&nbsp;
         首頁
     </a>
 
+    <!-- 新增庫存 Modal -->
+    <div class="modal" id="addStockModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">新增庫存</p>
+                <button class="delete" aria-label="close" onclick="closeModal()"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">原物料名稱</label>
+                    <input id="name" class="input" type="text" placeholder="例如：雞蛋">
+                </div>
+                <div class="field">
+                    <label class="label">種類</label>
+                    <input id="category" class="input" type="text" placeholder="例如：肉蛋奶">
+                </div>
+                <div class="field">
+                    <label class="label">安全庫存量</label>
+                    <input id="safe_quantity" class="input" type="number" min="0" placeholder="例如：10">
+                </div>
+                <div class="field">
+                    <label class="label">目前庫存量</label>
+                    <input id="quantity" class="input" type="number" min="0" placeholder="例如：30">
+                </div>
+                <div class="notification is-info is-light" id="stockMsgBox" style="display:none;"></div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" onclick="submitAddStock()">新增</button>
+                <button class="button" onclick="closeModal()">取消</button>
+            </footer>
+        </div>
+    </div>
 </body>
 </html>
 

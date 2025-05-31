@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查詢庫存</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .warning {
+            background-color: #ffe5e5;
+            color: #d00;
+            font-weight: bold;
+        }
+
+        #homeBtn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">原物料庫存查詢</h1>
+
+            <table class="table is-striped is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>名稱</th>
+                        <th>種類</th>
+                        <th>安全庫存</th>
+                        <th>目前庫存</th>
+                        <th>狀態</th>
+                    </tr>
+                </thead>
+                <tbody id="stockTableBody">
+                    <!-- 資料列會在這裡插入 -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <a href="index.html" class="button is-small is-dark home-button">
+        <i class="fas fa-home"></i>&nbsp;首頁
+    </a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            axios.get('query-stock.php')
+                .then(res => {
+                    const data = res.data;
+                    const tableBody = document.getElementById('stockTableBody');
+
+                    data.forEach(item => {
+                        const isLow = item.quantity < item.safe_quantity;
+                        const tr = document.createElement('tr');
+
+                        if (isLow) {
+                            tr.classList.add('warning'); // ✅ 加上紅色提示
+                        }
+
+                        tr.innerHTML = `
+                                   <td>${item.name}</td>
+                                   <td>${item.category}</td>
+                                   <td>${item.safe_quantity}</td>
+                                   <td>${item.quantity}</td>
+                                   <td>${isLow ? '⚠️ 過低' : '✔️ 正常'}</td>
+                `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    alert('庫存資料載入失敗');
+                    console.error(err);
+                });
+        });
+
+    </script>
+</body>
+</html>

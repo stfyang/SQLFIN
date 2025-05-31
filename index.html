@@ -14,17 +14,17 @@
     <div class="menu-container has-text-centered">
         <div class="title">餐廳管理系統</div>
         <div class="menu-grid">
-             <div class="menu-button" onclick="點餐(event)">
+            <div class="menu-button" onclick="點餐(event)">
                 <i class="fas fa-pen"></i><br>點餐功能
+            </div>
+            <div class="menu-button" onclick="菜單(event)">
+                <i class="fas fa-utensils"></i><br>菜單功能
             </div>
             <div class="menu-button" onclick="庫存(event)">
                 <i class="fas fa-warehouse"></i><br>庫存功能
             </div>
             <div class="menu-button" onclick="進貨(event)">
                 <i class="fas fa-dolly"></i><br>進貨管理功能
-            </div>
-            <div class="menu-button" onclick="菜單(event)">
-                <i class="fas fa-utensils"></i><br>菜單功能
             </div>
             <div class="menu-button" onclick="供應商(event)">
                 <i class="fas fa-user-tie"></i><br>供應商管理功能
@@ -38,19 +38,65 @@
     <div class="bottom-right-time" id="time"></div>
 
     <script>
-    function updateTime() {
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      document.getElementById('time').innerText = `${hours}:${minutes}`;
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
     </script>
 
+    <!-- ⚠️ 庫存預警 Modal -->
+    <div class="modal" id="stockWarningModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">⚠️ 庫存預警</p>
+                <button class="delete" aria-label="close" onclick="closeStockWarningModal()"></button>
+            </header>
+            <section class="modal-card-body" id="stockWarningContent">
+                <!-- 預警內容會自動插入 -->
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-danger" onclick="closeStockWarningModal()">我知道了</button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function closeStockWarningModal() {
+            document.getElementById('stockWarningModal').classList.remove('is-active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 一進首頁就查詢庫存
+            axios.get('query-stock.php')
+                .then(res => {
+                    const data = res.data;
+                    const warnings = [];
+
+                    data.forEach(item => {
+                        if (item.quantity < item.safe_quantity) {
+                            warnings.push(`🔴 ${item.name} 剩下 ${item.quantity}（安全庫存 ${item.safe_quantity}）`);
+                        }
+                    });
+
+                    if (warnings.length > 0) {
+                        const content = document.getElementById('stockWarningContent');
+                        content.innerHTML = warnings.map(w => `<p>${w}</p>`).join('');
+                        document.getElementById('stockWarningModal').classList.add('is-active');
+                    }
+                })
+                .catch(err => {
+                    console.error("庫存查詢失敗：", err);
+                });
+        });
+    </script>
 </body>
 </html>
-
 
 
 

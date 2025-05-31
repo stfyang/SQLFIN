@@ -5,16 +5,14 @@
     <title>菜單功能</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-    <script src="jump.js" defer></script>
     <link rel="stylesheet" href="book.css">
-
-    
 </head>
 <body>
     <div class="menu-container has-text-centered">
         <div class="title">菜單功能</div>
+
         <div class="menu-grid">
-            <div class="menu-button" onclick="alert('新增菜單')">
+            <div class="menu-button" id="openModalBtn">
                 <i class="fas fa-plus"></i><br>新增菜單
             </div>
             <div class="menu-button" onclick="alert('查詢菜單')">
@@ -29,9 +27,74 @@
         </div>
     </div>
 
+    <!-- Modal 結構 -->
+    <div class="modal" id="menuModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">新增菜單</p>
+                <button class="delete" aria-label="close" id="closeModalBtn"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">菜名</label>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="請輸入菜名" id="dishName">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">價格</label>
+                    <div class="control">
+                        <input class="input" type="number" placeholder="請輸入價格" id="dishPrice">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">食材</label>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="雞肉*1, 洋蔥*0.5" id="ingredients">
+                    </div>
+                    <p class="help">格式範例：草莓*1, 黃豆*2</p>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" id="submitMenuBtn">完成</button>
+                <button class="button" id="cancelModalBtn">取消</button>
+            </footer>
+        </div>
+    </div>
+
     <div class="bottom-right-time" id="time"></div>
 
+    <a href="index.html" class="button is-small is-dark home-button">
+        <i class="fas fa-home"></i>&nbsp;首頁
+    </a>
+
     <script>
+        const modal = document.getElementById('menuModal');
+        const openBtn = document.getElementById('openModalBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelModalBtn');
+
+        openBtn.addEventListener('click', () => {
+            modal.classList.add('is-active');
+        });
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('is-active');
+        });
+        cancelBtn.addEventListener('click', () => {
+            modal.classList.remove('is-active');
+        });
+
+        document.getElementById('submitMenuBtn').addEventListener('click', () => {
+            const name = document.getElementById('dishName').value;
+            const price = document.getElementById('dishPrice').value;
+            const ing = document.getElementById('ingredients').value;
+            alert(`菜單儲存成功：\n${name}, $${price}\n原物料：${ing}`);
+            modal.classList.remove('is-active');
+        });
+
         function updateTime() {
             const now = new Date();
             const hours = now.getHours().toString().padStart(2, '0');
@@ -41,10 +104,5 @@
         setInterval(updateTime, 1000);
         updateTime();
     </script>
-    <a href="index.html" class="button is-small is-dark home-button">
-        <i class="fas fa-home"></i>&nbsp;
-        首頁
-    </a>
-
 </body>
 </html>
