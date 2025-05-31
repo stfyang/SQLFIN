@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查詢供應商</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="query_idn.js"></script>
+
+  <link rel="stylesheet" href="book.css">
+
 </head>
 <body>
   <section class="section">
@@ -24,12 +28,15 @@
 
       <!-- 顯示結果 -->
       <table class="table is-striped is-fullwidth">
-        <thead>
-          <tr>
-            <th>名稱</th>
-            <th>電話</th>
-          </tr>
-        </thead>
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>電話</th>
+          <th>操作</th> <!-- ✅ 加這欄 -->
+        </tr>
+      </thead>
+
+
         <tbody id="supplierTableBody">
           <!-- 資料列會動態產生 -->
         </tbody>
@@ -37,49 +44,38 @@
     </div>
   </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.getElementById('searchInput');
-      const searchBtn = document.getElementById('searchBtn');
-      const tableBody = document.getElementById('supplierTableBody');
 
-      function fetchSuppliers(name = '') {
-        axios.post('query-idn.php', { name })
-          .then(res => {
-            tableBody.innerHTML = ''; // 清空表格
-            const data = res.data;
-
-            if (!Array.isArray(data)) {
-              alert('資料格式錯誤');
-              console.error(data);
-              return;
-            }
-
-            if (data.length === 0) {
-              tableBody.innerHTML = '<tr><td colspan="2">查無資料</td></tr>';
-            } else {
-              data.forEach(supplier => {
-                const row = `<tr><td>${supplier.名稱}</td><td>${supplier.電話}</td></tr>`;
-                tableBody.innerHTML += row;
-              });
-            }
-          })
-          .catch(err => {
-            alert('查詢失敗');
-            console.error(err);
-          });
-      }
-
-      // 初始載入全部
-      fetchSuppliers();
-
-      // 按下查詢按鈕
-      searchBtn.addEventListener('click', () => {
-        const name = searchInput.value.trim();
-        fetchSuppliers(name);
-      });
-    });
-  </script>
+  <!-- 修改 Modal -->
+  <div id="editSupplierModal" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">修改供應商</p>
+        <button class="delete" aria-label="close" id="closeEditModalBtn"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">名稱（主鍵，不可修改）</label>
+          <div class="control">
+            <input id="editSupplierName" class="input" type="text" readonly>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">電話</label>
+          <div class="control">
+            <input id="editSupplierPhone" class="input" type="text">
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button id="saveEditBtn" class="button is-success">儲存</button>
+        <button id="cancelEditModalBtn" class="button">取消</button>
+      </footer>
+    </div>
+  </div>
+  <a href="index.html" class="button is-small is-dark home-button">
+        <i class="fas fa-home"></i>&nbsp;
+        首頁
+    </a>
 </body>
 </html>

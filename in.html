@@ -6,97 +6,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
    <script src="jump.js" defer></script>
-   <style>
-        body {
-            background-image: url('背景圖.jpg'); /* 請替換為你的背景圖檔案名稱 */
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 0;
-        }
+   <link rel="stylesheet" href="book.css">
 
-            body::before {
-                content: "";
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(255, 255, 255, 0.5);
-                z-index: -1;
-            }
 
-        .menu-container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 960px;
-        }
-
-        .title {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: #222;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .menu-grid {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
-
-        .menu-button {
-            background-color: #ffe164;
-            border: 2px solid #333;
-            border-radius: 1rem;
-            text-align: center;
-            padding: 2rem 1rem;
-            font-size: 1.6rem;
-            transition: all 0.2s;
-            cursor: pointer;
-            width: 200px;
-        }
-
-            .menu-button:hover {
-                background-color: #ffd700;
-                transform: scale(1.05);
-            }
-
-            .menu-button i {
-                font-size: 2.5rem;
-                margin-bottom: 1rem;
-            }
-
-        .bottom-right-time {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            font-weight: bold;
-            background-color: rgba(255, 255, 255, 0.5);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-        }
-    </style>
 </head>
 <body>
     <div class="menu-container has-text-centered">
         <div class="title">進貨管理功能</div>
-        <div class="menu-grid">
-            <div class="menu-button" onclick="alert('新增進貨')">
+            <div class="menu-button" id="openAddPurchaseBtn">
                 <i class="fas fa-plus"></i><br>新增進貨
             </div>
-            <div class="menu-button" onclick="alert('查詢進貨')">
+
+            <div class="menu-button" onclick="window.location.href='query_purchase.php'">
                 <i class="fas fa-search"></i><br>查詢進貨
             </div>
+
             <div class="menu-button" onclick="alert('修改進貨')">
                 <i class="fas fa-edit"></i><br>修改進貨
             </div>
@@ -115,7 +39,45 @@
     setInterval(updateTime, 1000);
     updateTime();
     </script>
-    <button class="button is-small is-info" onclick="首頁()">首頁</button>
+    <a href="index.html" class="button is-small is-dark home-button">
+        <i class="fas fa-home"></i>&nbsp;
+        首頁
+    </a>
+
+<!-- 新增進貨 Modal -->
+<div class="modal" id="addPurchaseModal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">新增進貨單</p>
+      <button class="delete" aria-label="close" id="closePurchaseModalBtn"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="field">
+        <label class="label">供應商姓名</label>
+        <div class="control">
+          <input class="input" type="text" id="supplierName" placeholder="請輸入供應商姓名">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">原料名稱</label>
+        <div class="control">
+          <input class="input" type="text" id="materialName" placeholder="請輸入原料名稱">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">數量</label>
+        <div class="control">
+          <input class="input" type="number" id="quantity" placeholder="請輸入數量">
+        </div>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" id="savePurchaseBtn">儲存</button>
+      <button class="button" id="cancelPurchaseModalBtn">取消</button>
+    </footer>
+  </div>
+</div>
 
 </body>
 </html>

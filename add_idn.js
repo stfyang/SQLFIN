@@ -11,26 +11,41 @@ document.addEventListener('DOMContentLoaded', () => {
   cancelBtn.addEventListener('click', () => modal.classList.remove('is-active'));
 
   saveBtn.addEventListener('click', () => {
-    const name = document.getElementById('supplierName').value.trim();
-    const phone = document.getElementById('supplierPhone').value.trim();
+  const name = document.getElementById('supplierName').value.trim();
+  const phone = document.getElementById('supplierPhone').value.trim();
 
-    if (!name || !phone) {
-      alert('請填寫所有欄位');
-      return;
-    }
+  if (!name || !phone) {
+    alert('請填寫所有欄位');
+    return;
+  }
 
-    axios.post('add-idn.php', { name, phone })
-      .then(res => {
+  axios.post('add-idn.php', { name, phone })
+    .then(res => {
+      if (res.data.success) {
         alert(res.data.message || '新增成功');
         modal.classList.remove('is-active');
         document.getElementById('supplierName').value = '';
         document.getElementById('supplierPhone').value = '';
-      })
-      .catch(err => {
-        alert('新增失敗');
-        console.error(err);
-      });
-  });
+      } else {
+        alert(res.data.message || '新增失敗');
+      }
+    })
+    .catch(err => {
+      // 檢查是否是重複名稱錯誤（MySQL error 1062）
+      if (err.response && err.response.data && err.response.data.error) {
+        if (err.response.data.error.includes('Duplicate entry')) {
+          alert('名稱已存在，請使用其他名稱');
+        } else {
+          alert('新增失敗: ' + err.response.data.error);
+        }
+      } else {
+        alert('新增失敗，請稍後再試');
+      }
+      console.error(err);
+    });
+});
+
+  
 
   // 🔍 查詢供應商功能
   queryBtn.addEventListener('click', () => {
