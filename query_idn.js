@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       })
       .catch(err => {
-        alert('查詢失敗');
+      
         console.error(err);
       });
   }

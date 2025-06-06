@@ -2,32 +2,40 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>查詢庫存</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>原物料庫存管理</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
     <style>
         .warning {
             background-color: #ffe5e5;
             color: #d00;
             font-weight: bold;
         }
-
-        #homeBtn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
     </style>
 </head>
 <body>
     <section class="section">
         <div class="container">
-            <h1 class="title">原物料庫存查詢</h1>
+            <h1 class="title">原物料庫存管理</h1>
 
+            <!-- 查詢原物料 -->
+            <div class="box">
+                <h2 class="subtitle">查詢原物料</h2>
+                <div class="field">
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select id="filterSelect" onchange="filterStock()">
+                                <option value="">全部原物料</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原物料表格 -->
             <table class="table is-striped is-fullwidth">
                 <thead>
                     <tr>
@@ -36,50 +44,122 @@
                         <th>安全庫存</th>
                         <th>目前庫存</th>
                         <th>狀態</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
-                <tbody id="stockTableBody">
-                    <!-- 資料列會在這裡插入 -->
-                </tbody>
+                <tbody id="stockTableBody"></tbody>
             </table>
+
         </div>
     </section>
 
-    <a href="index.html" class="button is-small is-dark home-button">
-        <i class="fas fa-home"></i>&nbsp;首頁
-    </a>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        let fullStock = [];
+
+        // 讀取所有資料並初始化下拉選單與表格
+        function loadStock() {
             axios.get('query-stock.php')
                 .then(res => {
-                    const data = res.data;
-                    const tableBody = document.getElementById('stockTableBody');
-
-                    data.forEach(item => {
-                        const isLow = item.quantity < item.safe_quantity;
-                        const tr = document.createElement('tr');
-
-                        if (isLow) {
-                            tr.classList.add('warning'); // ✅ 加上紅色提示
-                        }
-
-                        tr.innerHTML = `
-                                   <td>${item.name}</td>
-                                   <td>${item.category}</td>
-                                   <td>${item.safe_quantity}</td>
-                                   <td>${item.quantity}</td>
-                                   <td>${isLow ? '⚠️ 過低' : '✔️ 正常'}</td>
-                `;
-                        tableBody.appendChild(tr);
-                    });
+                    fullStock = res.data;
+                    renderTable(fullStock);
+                    initFilterOptions(fullStock);
                 })
                 .catch(err => {
-                    alert('庫存資料載入失敗');
+                    alert('資料載入失敗');
                     console.error(err);
                 });
-        });
+        }
+
+        // 初始化下拉選單內容
+        function initFilterOptions(data) {
+            const select = document.getElementById('filterSelect');
+            select.innerHTML = '<option value="">全部原物料</option>';
+            const names = [...new Set(data.map(item => item.name))];
+            names.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            const tableBody = document.getElementById('stockTableBody');
+            tableBody.innerHTML = '';
+
+            data.forEach(item => {
+                const isLow = parseInt(item.quantity) < parseInt(item.safe_quantity);
+                const tr = document.createElement('tr');
+                if (isLow) tr.classList.add('warning');
+
+                tr.innerHTML = `
+      <td><input class="input" value="${item.name}" disabled></td>
+      <td><input class="input" id="cat_${item.name}" value="${item.category}"></td>
+      <td><input class="input" id="safe_${item.name}" type="number" value="${item.safe_quantity}"></td>
+      <td><input class="input" id="qty_${item.name}" type="number" value="${item.quantity}"></td>
+      <td>${isLow ? '⚠️ 過低' : '✔️ 正常'}</td>
+      <td>
+        <button class="button is-small is-info" onclick="updateMaterial('${item.name}')">修改</button>
+        <button class="button is-small is-danger" onclick="deleteMaterial('${item.name}')">刪除</button>
+      </td>
+    `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // 選擇查詢條件後過濾資料
+        function filterStock() {
+            const selected = document.getElementById('filterSelect').value;
+            if (!selected) {
+                renderTable(fullStock);
+            } else {
+                const filtered = fullStock.filter(item => item.name === selected);
+                renderTable(filtered);
+            }
+        }
+
+        // 修改資料
+        function updateMaterial(name) {
+            const safe = document.getElementById(`safe_${name}`).value;
+            const cat = document.getElementById(`cat_${name}`).value;
+            const qty = document.getElementById(`qty_${name}`).value;
+
+            axios.post('update-sto.php', {
+                name,
+                safe_quantity: safe,
+                category: cat,
+                quantity: qty
+            }).then(res => {
+                if (res.data.success) {
+                    alert('修改成功');
+                    loadStock();
+                } else {
+                    alert('修改失敗: ' + (res.data.error || ''));
+                }
+            });
+        }
+
+        // 刪除資料
+        function deleteMaterial(name) {
+            if (!confirm('確定要刪除「' + name + '」這筆原物料嗎？')) return;
+            axios.post('delete-sto.php', { name })
+                .then(res => {
+                    if (res.data.success) {
+                        alert('刪除成功');
+                        loadStock();
+                    } else {
+                        alert('刪除失敗: ' + (res.data.error || ''));
+                    }
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadStock);
 
     </script>
+    <a href="index.html" class="button is-small is-dark home-button">
+        <i class="fas fa-home"></i>&nbsp;
+        首頁
+    </a>
 </body>
 </html>
