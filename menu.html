@@ -1,224 +1,241 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>菜單管理系統</title>
-  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet" />
- <script src="jump.js" defer></script>
-   
-   <link rel="stylesheet" href="book.css">
+    <meta charset="UTF-8" />
+    <title>菜單管理系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="book.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-  <section class="section">
-    <div class="container">
-      <h1 class="title">菜單管理</h1>
-      <button class="button is-primary mb-4" onclick="openModal()">新增菜品</button>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">菜單管理</h1>
+            <button class="button is-primary mb-4" onclick="openModal()">新增菜品</button>
 
-      <table class="table is-fullwidth is-striped" id="dishTable">
-        <thead>
-          <tr>
-            <th>菜品名稱</th>
-            <th>單價</th>
-            <th>原物料明細</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+            <table class="table is-fullwidth is-striped" id="dishTable">
+                <thead>
+                    <tr>
+                        <th>菜品名稱</th>
+                        <th>單價</th>
+                        <th>原物料明細</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal" id="dishModal">
+        <div class="modal-background" onclick="closeModal()"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title" id="modalTitle">新增菜品</p>
+                <button class="delete" aria-label="close" onclick="closeModal()"></button>
+            </header>
+            <section class="modal-card-body">
+                <input type="hidden" id="dishId" />
+                <div class="field">
+                    <label class="label">菜品名稱</label>
+                    <div class="control">
+                        <input class="input" type="text" id="dishName" placeholder="例如：炒飯" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">單價</label>
+                    <div class="control">
+                        <input class="input" type="number" id="dishPrice" step="0.01" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">使用原物料與數量</label>
+                    <div id="materialList"></div>
+                    <button class="button is-small is-link mt-2" type="button" onclick="addMaterialSelect()">➕ 增加原物料</button>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" onclick="submitDish()">儲存</button>
+                <button class="button" onclick="closeModal()">取消</button>
+            </footer>
+        </div>
     </div>
-  </section>
 
-  <!-- 新增/修改 Modal -->
-  <div class="modal" id="dishModal">
-    <div class="modal-background" onclick="closeModal()"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title" id="modalTitle">新增菜品</p>
-        <button class="delete" aria-label="close" onclick="closeModal()"></button>
-      </header>
-      <section class="modal-card-body">
-        <input type="hidden" id="dishId" />
-        <div class="field">
-          <label class="label">菜品名稱</label>
-          <div class="control">
-            <input class="input" type="text" id="dishName" placeholder="例如：炒飯" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">單價</label>
-          <div class="control">
-            <input class="input" type="number" id="dishPrice" step="0.01" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">使用原物料與數量</label>
-          <div id="materialList"></div>
-          <button class="button is-small is-link mt-2" type="button" onclick="addMaterialSelect()">➕ 增加原物料</button>
-        </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button class="button is-success" onclick="submitDish()">儲存</button>
-        <button class="button" onclick="closeModal()">取消</button>
-      </footer>
-    </div>
-  </div>
+    <script>
+        let materials = [];
+        let dishes = [];
 
-  <script>
-    let materials = [];
-    let dishes = [];
-
-    async function fetchMaterials() {
-      const res = await fetch('get_materials.php');
-      materials = await res.json();
-    }
-
-    async function fetchDishes() {
-      const res = await fetch('get_dishes.php');
-      dishes = await res.json();
-      renderTable();
-    }
-
-    function renderTable() {
-      const tbody = document.querySelector('#dishTable tbody');
-      tbody.innerHTML = '';
-      dishes.forEach(dish => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${dish.name}</td>
-          <td>${dish.price}</td>
-          <td>
-            ${dish.materials.map(m => `${m.material_name} x ${m.quantity}`).join('<br>')}
-          </td>
-          <td>
-            <button class="button is-small is-info" onclick="editDish(${dish.id})">編輯</button>
-            <button class="button is-small is-danger" onclick="deleteDish(${dish.id})">刪除</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function openModal() {
-      document.getElementById('modalTitle').textContent = '新增菜品';
-      document.getElementById('dishId').value = '';
-      document.getElementById('dishName').value = '';
-      document.getElementById('dishPrice').value = '';
-      document.getElementById('materialList').innerHTML = '';
-      addMaterialSelect();
-      document.getElementById('dishModal').classList.add('is-active');
-    }
-
-    function closeModal() {
-      document.getElementById('dishModal').classList.remove('is-active');
-    }
-
-    function addMaterialSelect(selectedId = null, quantity = '') {
-      const div = document.createElement('div');
-      div.className = 'field is-grouped mb-2';
-      div.innerHTML = `
-        <div class="control is-expanded">
-          <div class="select is-fullwidth">
-            <select name="material[]" required>
-              ${materials.map(mat => `<option value="${mat.id}" ${selectedId == mat.id ? 'selected' : ''}>${mat.name}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-        <div class="control">
-          <input class="input" type="number" name="quantity[]" placeholder="數量" step="0.01" value="${quantity}" required />
-        </div>
-        <div class="control">
-          <button class="button is-danger" type="button" onclick="this.closest('.field').remove()">✖</button>
-        </div>
-      `;
-      document.getElementById('materialList').appendChild(div);
-    }
-
-    function editDish(id) {
-      const dish = dishes.find(d => d.id === id);
-      if (!dish) return alert('找不到該菜品');
-      document.getElementById('modalTitle').textContent = '編輯菜品';
-      document.getElementById('dishId').value = dish.id;
-      document.getElementById('dishName').value = dish.name;
-      document.getElementById('dishPrice').value = dish.price;
-      const list = document.getElementById('materialList');
-      list.innerHTML = '';
-      if (dish.materials.length > 0) {
-        dish.materials.forEach(m => addMaterialSelect(m.material_id, m.quantity));
-      } else {
-        addMaterialSelect();
-      }
-      document.getElementById('dishModal').classList.add('is-active');
-    }
-
-    async function submitDish() {
-      const id = document.getElementById('dishId').value;
-      const name = document.getElementById('dishName').value.trim();
-      const price = parseFloat(document.getElementById('dishPrice').value);
-      if (!name) return alert('請輸入菜品名稱');
-      if (!price || price <= 0) return alert('請輸入正確單價');
-
-      // 取得所有原物料與數量
-      const materialsSelects = Array.from(document.querySelectorAll('#materialList select[name="material[]"]'));
-      const quantitiesInput = Array.from(document.querySelectorAll('#materialList input[name="quantity[]"]'));
-
-      let materialsData = [];
-      for (let i = 0; i < materialsSelects.length; i++) {
-        const material_id = parseInt(materialsSelects[i].value);
-        const quantity = parseFloat(quantitiesInput[i].value);
-        if (!material_id || !quantity || quantity <= 0) {
-          return alert('請確認所有原物料及數量均已正確填寫');
+        async function fetchMaterials() {
+            try {
+                const res = await fetch('get_materials.php');
+                materials = await res.json();
+                console.log("原物料資料：", materials); // 加這行看看拿到什麼
+            } catch (err) {
+                alert('無法取得原物料：' + err.message);
+            }
         }
-        materialsData.push({ material_id, quantity });
-      }
 
-      const payload = { name, price, materials: materialsData };
-      let url = 'add_dish.php';
-      if (id) {
-        url = 'update_dish.php';
-        payload.id = parseInt(id);
-      }
 
-      const res = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const result = await res.json();
-      if (result.success) {
-        alert('儲存成功');
-        closeModal();
-        await fetchDishes();
-      } else {
-        alert('錯誤：' + (result.error || '未知錯誤'));
-      }
-    }
+        async function fetchDishes() {
+            const res = await fetch('get_dishes.php');
+            const data = await res.json();
+            if (data.success) {
+                dishes = data.dishes;
+                renderTable();
+            } else {
+                alert('取得菜品失敗：' + data.error);
+            }
+        }
 
-    async function deleteDish(id) {
-      if (!confirm('確定要刪除此菜品？')) return;
-      const res = await fetch('delete_dish.php', {
-        method: 'POST',
-        body: JSON.stringify({ id }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const result = await res.json();
-      if (result.success) {
-        alert('刪除成功');
-        await fetchDishes();
-      } else {
-        alert('錯誤：' + (result.error || '未知錯誤'));
-      }
-    }
+        function renderTable() {
+            const tbody = document.querySelector('#dishTable tbody');
+            tbody.innerHTML = '';
+            dishes.forEach(dish => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dish.name}</td>
+                    <td>${dish.price}</td>
+                    <td>${dish.materials.map(m => `${m.material_name} x ${m.quantity}`).join('<br>')}</td>
+                    <td>
+                          <button class="button is-small is-info" onclick="editDishByName('${dish.name}')">修改</button>
+                          <button class="button is-small is-danger" onclick="deleteDishByName('${dish.name}')">刪除</button>
+                    </td>
+                    `;
 
-    async function init() {
-      await fetchMaterials();
-      await fetchDishes();
-    }
+                tbody.appendChild(tr);
+            });
+        }
 
-    window.onload = init;
-  </script>
-  <a href="index.html" class="button is-small is-dark home-button">
+
+        function addMaterialSelect(selectedName = null, quantity = '') {
+            const div = document.createElement('div');
+            div.className = 'field is-grouped mb-2';
+            div.innerHTML = `
+                    <div class="control is-expanded">
+                      <div class="select is-fullwidth">
+                        <select name="material[]" required>
+                          ${materials.map(name => `<option value="${name}" ${selectedName === name ? 'selected' : ''}>${name}</option>`).join('')}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="control">
+                      <input class="input" type="number" name="quantity[]" placeholder="數量" step="0.01" value="${quantity}" required />
+                    </div>
+                    <div class="control">
+                      <button class="button is-danger" type="button" onclick="this.closest('.field').remove()">✖</button>
+                    </div>
+                  `;
+            document.getElementById('materialList').appendChild(div);
+        }
+
+        function openModal() {
+            document.getElementById('modalTitle').textContent = '新增菜品';
+            document.getElementById('dishId').value = '';
+            document.getElementById('dishName').value = '';
+            document.getElementById('dishPrice').value = '';
+            document.getElementById('materialList').innerHTML = '';
+            addMaterialSelect();
+            document.getElementById('dishModal').classList.add('is-active');
+        }
+
+        function closeModal() {
+            document.getElementById('dishModal').classList.remove('is-active');
+        }
+
+        function editDishByName(name) {
+            const dish = dishes.find(d => d.name === name);
+            if (!dish) return alert('找不到該菜品');
+
+            document.getElementById('modalTitle').textContent = '編輯菜品';
+            document.getElementById('dishId').value = dish.name;
+            document.getElementById('dishName').value = dish.name;
+            document.getElementById('dishPrice').value = dish.price;
+            const list = document.getElementById('materialList');
+            list.innerHTML = '';
+            dish.materials.forEach(m => addMaterialSelect(m.material_name, m.quantity));
+            document.getElementById('dishModal').classList.add('is-active');
+        }
+
+        async function submitDish() {
+            const id = document.getElementById('dishId').value;
+            const name = document.getElementById('dishName').value.trim();
+            const price = parseFloat(document.getElementById('dishPrice').value);
+
+            if (!name) return alert('請輸入菜品名稱');
+            if (!price || price <= 0) return alert('請輸入正確的價格');
+
+            const materialsSelects = Array.from(document.querySelectorAll('#materialList select[name="material[]"]'));
+            const quantitiesInput = Array.from(document.querySelectorAll('#materialList input[name="quantity[]"]'));
+
+            let materialsData = [];
+            for (let i = 0; i < materialsSelects.length; i++) {
+                const material_name = materialsSelects[i].value;
+                const quantity = parseFloat(quantitiesInput[i].value);
+                if (!material_name || !quantity || quantity <= 0) {
+                    return alert('請確認所有原物料與數量都填寫正確');
+                }
+                materialsData.push({ material_name, quantity });
+            }
+
+            const payload = { name, price, materials: materialsData };
+            let url = 'add_dish.php';
+
+            if (id) {
+                url = 'update_dish.php';
+                payload.old_name = id; // 使用舊的名稱當成識別
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('儲存成功');
+                    closeModal();
+                    await fetchDishes();
+                } else {
+                    alert('儲存失敗：' + result.error);
+                }
+            } catch (error) {
+                alert('儲存錯誤：' + error.message);
+            }
+        }
+
+        async function deleteDishByName(name) {
+            if (!confirm('確定要刪除「' + name + '」嗎？')) return;
+
+            try {
+                const res = await fetch('delete_dish.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ name }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('刪除成功');
+                    await fetchDishes();
+                } else {
+                    alert('刪除失敗：' + result.error);
+                }
+            } catch (err) {
+                alert('錯誤：' + err.message);
+            }
+        }
+
+        window.onload = async () => {
+            await fetchMaterials();
+            await fetchDishes();
+        };
+    </script>
+
+    <a href="index.html" class="button is-small is-dark home-button">
         <i class="fas fa-home"></i>&nbsp;
         首頁
     </a>
+
 </body>
 </html>

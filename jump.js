@@ -1,5 +1,5 @@
 function 點餐() {
-    window.location.href = "oder.html"; 
+    window.location.href = "order.html"; 
   }
   function 菜單() {
     window.location.href = "menu.html"; 

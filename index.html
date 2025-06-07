@@ -79,8 +79,11 @@
                     const warnings = [];
 
                     data.forEach(item => {
-                        if (item.quantity < item.safe_quantity) {
-                            warnings.push(`🔴 ${item.name} 剩下 ${item.quantity}（安全庫存 ${item.safe_quantity}）`);
+                        const quantity = Number(item.quantity);
+                        const safe = Number(item.safe_quantity);
+
+                        if (quantity < safe) {
+                            warnings.push(`🔴 ${item.name} 剩下 ${quantity}（安全庫存 ${safe}）`);
                         }
                     });
 
@@ -95,6 +98,7 @@
                 });
         });
     </script>
+
 </body>
 </html>
 

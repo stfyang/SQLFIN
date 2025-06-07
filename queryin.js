@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+/* document.addEventListener('DOMContentLoaded', function () {
   const searchBtn = document.getElementById('searchBtn');
   const searchInput = document.getElementById('searchInput');
   const tableBody = document.getElementById('purchaseTableBody');
@@ -79,3 +79,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+ */

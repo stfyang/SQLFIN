@@ -1,99 +1,100 @@
-     
-     .home-button {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            z-index: 10;
-            background-color: #444;
-            color: white;
-            border-radius: 1.5rem;
-            font-size: 2rem; /*  更大字體 */
-            padding: 1.2rem 2.5rem; /*  更大內距 */
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease-in-out;
-            font-weight: bold;
-        }
+.home-button {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    z-index: 10;
+    background-color: #444;
+    color: white;
+    border-radius: 1.5rem;
+    font-size: 2rem; /*  更大字體 */
+    padding: 1.2rem 2.5rem; /*  更大內距 */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease-in-out;
+    font-weight: bold;
+}
 
-            .home-button:hover {
-                background-color: #000;
-                transform: scale(1.12); /* 放大動畫 */
-            }
-
-    body {
-      background-image: url('背景圖.jpg'); /* 請放背景圖到同資料夾 */
-      background-size: cover;
-      background-position: center;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      z-index: 0;
+    .home-button:hover {
+        background-color: #000;
+        transform: scale(1.12); /* 放大動畫 */
     }
+
+body {
+    background-image: url('背景圖.jpg'); /* 請放背景圖到同資料夾 */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 0;
+}
 
     body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255, 255, 255, 0.5);
-      z-index: -1;
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.5);
+        z-index: -1;
     }
 
-    .menu-container {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 960px;
-    }
+.menu-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 960px;
+}
 
-    .title {
-      font-size: 3.5rem;
-      font-weight: 900;
-      color: #222;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-      margin-bottom: 2rem;
-    }
+.title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #222;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+}
 
-    .menu-grid {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 2rem;
-    }
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+}
 
-    .menu-button {
-      background-color: #ffe164;
-      border: 2px solid #333;
-      border-radius: 1rem;
-      text-align: center;
-      padding: 2rem 1rem;
-      font-size: 1.6rem;
-      transition: all 0.2s;
-      cursor: pointer;
-      width: 200px;
-    }
+.menu-button {
+    background-color: #ffe164;
+    border: 2px solid #333;
+    border-radius: 1rem;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 1.6rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    width: 100%;
+    white-space: nowrap;
+    max-width: 240px;
+}
 
     .menu-button:hover {
-      background-color: #ffd700;
-      transform: scale(1.05);
+        background-color: #ffd700;
+        transform: scale(1.05);
     }
 
     .menu-button i {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
     }
 
-    .bottom-right-time {
-      position: fixed;
-      bottom: 1rem;
-      right: 1rem;
-      font-weight: bold;
-      background-color: rgba(255, 255, 255, 0.5);
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-    }
+.bottom-right-time {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+}
