@@ -5,7 +5,7 @@ function 點餐() {
     window.location.href = "menu.html"; 
   }
   function 進貨() {
-    window.location.href = "in.html"; 
+    window.location.href = "in.php"; 
   }
   function 庫存() {
     window.location.href = "sto.html"; 

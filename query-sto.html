@@ -1,20 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>原物料庫存管理</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="stock.css" />
 
-
-    <style>
-        .warning {
-            background-color: #ffe5e5;
-            color: #d00;
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
     <section class="section">
@@ -49,7 +43,6 @@
                 </thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
-
         </div>
     </section>
 
@@ -94,16 +87,16 @@
                 if (isLow) tr.classList.add('warning');
 
                 tr.innerHTML = `
-      <td><input class="input" value="${item.name}" disabled></td>
-      <td><input class="input" id="cat_${item.name}" value="${item.category}"></td>
-      <td><input class="input" id="safe_${item.name}" type="number" value="${item.safe_quantity}"></td>
-      <td><input class="input" id="qty_${item.name}" type="number" value="${item.quantity}"></td>
-      <td>${isLow ? '⚠️ 過低' : '✔️ 正常'}</td>
-      <td>
-        <button class="button is-small is-info" onclick="updateMaterial('${item.name}')">修改</button>
-        <button class="button is-small is-danger" onclick="deleteMaterial('${item.name}')">刪除</button>
-      </td>
-    `;
+                  <td><input class="input" value="${item.name}" disabled></td>
+                  <td><input class="input" id="cat_${item.name}" value="${item.category}"></td>
+                  <td><input class="input" id="safe_${item.name}" type="number" value="${item.safe_quantity}"></td>
+                  <td><input class="input" id="qty_${item.name}" type="number" value="${item.quantity}"></td>
+                  <td>${isLow ? '⚠️ 過低' : '✔️ 正常'}</td>
+                  <td>
+                    <button class="button is-info" onclick="updateMaterial('${item.name}')">修改</button>
+                    <button class="button is-danger" onclick="deleteMaterial('${item.name}')">刪除</button>
+                  </td>
+                `;
                 tableBody.appendChild(tr);
             });
         }
@@ -118,6 +111,9 @@
                 renderTable(filtered);
             }
         }
+
+        // 初始化讀取資料
+        loadStock();
 
         // 修改資料
         function updateMaterial(name) {

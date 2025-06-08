@@ -1,18 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <script src="jump.js" defer></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>營運分析</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        canvas {
+            max-width: 100%;
+        }
+
+        .home-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 10;
+            background-color: #444;
+            color: white;
+            border-radius: 1.5rem;
+            font-size: 2rem; /*  更大字體 */
+            padding: 1.2rem 2.5rem; /*  更大內距 */
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease-in-out;
+            font-weight: bold;
+        }
+
+            .home-button:hover {
+                background-color: #000;
+                transform: scale(1.12); /* 放大動畫 */
+            }
+
+    </style>
 </head>
 <body>
-    <h1>這是分析</h1>
-    <a href="index.html" class="button is-small is-dark home-button">
-        <i class="fas fa-home"></i>&nbsp;
-        首頁
-    </a>
+    <section class="section">
+        <div class="container">
+            <!-- 返回首頁按鈕 -->
+            <a href="index.html" class="button is-small is-dark home-button">
+                <i class="fas fa-home"></i>&nbsp; 首頁
+            </a>
+
+            <h1 class="title has-text-centered">📊 營運分析</h1>
+
+            <!-- 顯示本月總營收與熱銷品項 -->
+            <div class="notification is-warning has-text-centered">
+                <p id="totalRevenue" class="subtitle has-text-weight-semibold"></p>
+                <p id="bestDish" class="subtitle has-text-weight-semibold"></p>
+            </div>
+
+            <!-- 銷售圖表 -->
+            <div class="box">
+                <canvas id="salesChart" height="100"></canvas>
+            </div>
+
+            <div class="box mt-5">
+                <canvas id="dishSalesChart" height="100"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        axios.get('an_data.php').then(res => {
+            const chartData = res.data.chartData;
+            const labels = chartData.map(d => d.日期);
+            const sales = chartData.map(d => d.總銷售);
+
+            // 折線圖：每日銷售
+            new Chart(document.getElementById('salesChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '每日銷售額',
+                        data: sales,
+                        fill: true,
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '每日銷售趨勢'
+                        }
+                    }
+                }
+            });
+
+            // 總營收 & 熱銷品項
+            document.getElementById('totalRevenue').textContent = `本月總營收：$${res.data.totalRevenue}`;
+            document.getElementById('bestDish').textContent = `熱銷品項：${res.data.bestDish.菜品名}（${res.data.bestDish.次數} 次）`;
+
+            // 長條圖：各餐點銷售次數
+            const dishLabels = res.data.dishSales.map(item => item.菜品名);
+            const dishCounts = res.data.dishSales.map(item => item.次數);
+
+            new Chart(document.getElementById('dishSalesChart'), {
+                type: 'bar',
+                data: {
+                    labels: dishLabels,
+                    datasets: [{
+                        label: '本月各菜品銷售次數',
+                        data: dishCounts,
+                        backgroundColor: 'rgba(243, 156, 18, 0.7)', // 黃色
+                        borderColor: '#f39c12',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '餐點銷售排行榜'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

@@ -1,50 +1,49 @@
-<script>
-document.getElementById('orderForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-
-  // 從表單收集所有餐點的數量
-  const form = e.target;
-  const formData = new FormData(form);
-  const dishes = {};
-
-  formData.forEach((value, key) => {
-    const qty = parseInt(value);
-    if (qty > 0) {
-      dishes[key] = qty;
-    }
-  });
-
-  // 若未選擇任何餐點
-  if (Object.keys(dishes).length === 0) {
-    document.getElementById('message').innerHTML = '<p style="color:red;">請選擇至少一項餐點。</p>';
+/* async function submitOrder() {
+  if (Object.keys(cart).length === 0) {
+    showMessage('請先加入餐點', true);
     return;
   }
 
-  // 發送到 PHP
-  fetch('新增訂單.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ dishes })
-  })
-  .then(response => response.json())
-  .then(data => {
-    const msgBox = document.getElementById('message');
-    if (data.error) {
-      msgBox.innerHTML = `<p style="color:red;">${data.error}</p>`;
-      if (data.details && Array.isArray(data.details)) {
-        const list = data.details.map(item => `<li>${item}</li>`).join('');
-        msgBox.innerHTML += `<ul style="color:red;">${list}</ul>`;
-      }
-    } else {
-      msgBox.innerHTML = `<p style="color:green;">${data.message}</p>`;
-      form.reset(); // 清空表單
+  try {
+    const res = await axios.post('add_order.php', { dishes: cart });
+
+    // 先清空訊息區
+    let msgBox = document.getElementById('message');
+    if (!msgBox) {
+      msgBox = document.createElement('div');
+      msgBox.id = 'message';
+      msgBox.style.marginTop = '1em';
+      document.body.prepend(msgBox);
     }
-  })
-  .catch(err => {
-    document.getElementById('message').innerHTML = '<p style="color:red;">系統錯誤，請稍後再試。</p>';
+    msgBox.innerHTML = '';
+
+    // 顯示主訊息
+    msgBox.innerHTML = `<p style="color:green;">${res.data.message}</p>`;
+
+    // 如果有 details 就列成清單
+    if (res.data.details && Array.isArray(res.data.details)) {
+      const listItems = res.data.details.map(item => `<li>${item}</li>`).join('');
+      msgBox.innerHTML += `<ul style="color:red; margin-left: 1em;">${listItems}</ul>`;
+    }
+
+    cart = {};
+    renderCart();
+
+  } catch (err) {
+    let msg = '新增失敗';
+    if (err.response && err.response.data && err.response.data.message) {
+      msg = err.response.data.message;
+    }
+
+    let msgBox = document.getElementById('message');
+    if (!msgBox) {
+      msgBox = document.createElement('div');
+      msgBox.id = 'message';
+      msgBox.style.marginTop = '1em';
+      document.body.prepend(msgBox);
+    }
+    msgBox.innerHTML = `<p style="color:red;">${msg}</p>`;
     console.error(err);
-  });
-});
-</script>
+  }
+}
+ */

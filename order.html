@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>新增訂單</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <section class="section">
+        <div class="container box-yellow">
+            <h1 class="title has-text-centered">新增訂單</h1>
+
+            <div class="field is-grouped is-justify-content-center" style="margin-bottom: 1.5rem;">
+                <div class="control">
+                    <div class="select is-medium">
+                        <select id="dishSelect"></select>
+                    </div>
+                </div>
+                <div class="control">
+                    <input class="input is-medium" type="number" id="dishQty" min="1" value="1" style="width: 4rem; text-align:center;" />
+                </div>
+                <div class="control">
+                    <button class="button order-btn" onclick="addToCart()">➕ 加入</button>
+                </div>
+            </div>
+
+            <h2 class="subtitle has-text-centered">🧾 已選餐點</h2>
+
+            <table class="table is-fullwidth is-hoverable">
+                <thead>
+                    <tr>
+                        <th>菜品</th>
+                        <th>數量</th>
+                        <th>單價</th>
+                        <th>小計</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="cartBody"></tbody>
+            </table>
+
+            <div class="field has-text-right" style="margin-top: 1rem;">
+                <label class="label">總價</label>
+                <input class="input" id="total" readonly style="max-width: 8rem; display: inline-block; text-align: right;" />
+            </div>
+
+            <div class="field is-grouped is-justify-content-center" style="margin-top: 2rem;">
+                <button class="button order-btn" onclick="submitOrder()">✅ 新增訂單</button>
+                <button class="button order-btn" onclick="location.href='order_query.php'">查詢訂單</button>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        let menu = {};
+        let cart = {};
+
+        async function loadMenu() {
+            try {
+                const res = await axios.get('get_order.php');
+                const select = document.getElementById('dishSelect');
+                res.data.forEach(d => {
+                    menu[d.菜品名] = d.單價;
+                    const opt = document.createElement('option');
+                    opt.value = d.菜品名;
+                    opt.text = `${d.菜品名}（${d.單價}元）`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                alert('無法載入菜單資料');
+                console.error(e);
+            }
+        }
+
+        function addToCart() {
+            const name = document.getElementById('dishSelect').value;
+            const qty = parseInt(document.getElementById('dishQty').value);
+            if (!name || qty < 1) return;
+
+            if (cart[name]) {
+                cart[name] += qty;
+            } else {
+                cart[name] = qty;
+            }
+            renderCart();
+        }
+
+        function removeFromCart(name) {
+            delete cart[name];
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cartBody');
+            tbody.innerHTML = '';
+            let total = 0;
+
+            for (const [name, qty] of Object.entries(cart)) {
+                const price = menu[name];
+                const subtotal = price * qty;
+                total += subtotal;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${name}</td>
+                  <td>${qty}</td>
+                  <td>${price}</td>
+                  <td>${subtotal}</td>
+                  <td><button class="button is-small is-danger" onclick="removeFromCart('${name}')">刪除</button></td>
+                `;
+                tbody.appendChild(row);
+            }
+            document.getElementById('total').value = total;
+        }
+
+        async function submitOrder() {
+            if (Object.keys(cart).length === 0) {
+                alert('請先加入餐點');
+                return;
+            }
+            try {
+                const res = await axios.post('add_order.php', { dishes: cart });
+                alert(res.data.message);
+                location.reload();
+            } catch (err) {
+                alert('新增失敗');
+                console.error(err);
+            }
+        }
+
+        loadMenu();
+    </script>
+    <a href="index.html" class="button is-small is-dark home-button">
+        <i class="fas fa-home"></i>&nbsp;首頁
+    </a>
+</body>
+</html>
+

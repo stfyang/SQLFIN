@@ -1,0 +1,103 @@
+﻿body {
+    background-color: white;
+    color: #333;
+    padding: 2rem 1rem;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+h1.title {
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* 表格風格 */
+table.table {
+    background-color: #fff9db; /* 淡淡黃色背景 */
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 0 6px rgba(255, 225, 100, 0.3);
+}
+
+thead tr {
+    background-color: #ffe164;
+    color: #222;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #fffbe0;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #fff9db;
+}
+
+/* 庫存過低列加底色 */
+tr.warning {
+    background-color: #ffe5e5 !important;
+    color: #d00;
+    font-weight: bold;
+}
+
+/* input欄位淡色背景，無邊框，保持乾淨 */
+input.input {
+    background-color: #fff9db;
+    border: none;
+    font-weight: 600;
+    color: #333;
+    padding-left: 0.5rem;
+    max-width: 150px;
+}
+
+    input.input[disabled] {
+        color: #666;
+        background-color: transparent;
+        font-weight: normal;
+    }
+
+/* 按鈕風格 */
+button.button.is-info {
+    background-color: #ffe164;
+    color: #333;
+    border: none;
+    min-width: 80px;
+    font-weight: 600;
+}
+
+    button.button.is-info:hover {
+        background-color: #ffd633;
+        color: #222;
+    }
+
+button.button.is-danger {
+    min-width: 80px;
+    font-weight: 600;
+}
+
+/* 下拉選單 */
+select.select {
+    max-width: 300px;
+}
+
+.home-button {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    z-index: 10;
+    background-color: #444;
+    color: white;
+    border-radius: 1.5rem;
+    font-size: 2rem; /*  更大字體 */
+    padding: 1.2rem 2.5rem; /*  更大內距 */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease-in-out;
+    font-weight: bold;
+}
+
+    .home-button:hover {
+        background-color: #000;
+        transform: scale(1.12); /* 放大動畫 */
+    }

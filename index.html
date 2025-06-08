@@ -8,7 +8,7 @@
    <script src="jump.js" defer></script>
    <link rel="stylesheet" href="book.css">
 
-   
+
 </head>
 <body>
     <div class="menu-container has-text-centered">
@@ -68,28 +68,50 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         function closeStockWarningModal() {
+            const acknowledged = JSON.parse(localStorage.getItem('acknowledgedWarnings') || '[]');
+            const newWarnings = Array.from(document.querySelectorAll('#stockWarningContent p'))
+                .map(p => p.dataset.name);
+
+            // 合併並去重
+            const updatedAcknowledged = Array.from(new Set([...acknowledged, ...newWarnings]));
+
+            localStorage.setItem('acknowledgedWarnings', JSON.stringify(updatedAcknowledged));
             document.getElementById('stockWarningModal').classList.remove('is-active');
         }
 
+        // 清除過期的已提醒紀錄（每天重置）
+        const today = new Date().toISOString().slice(0, 10);
+        const lastReset = localStorage.getItem('ackResetDate');
+        if (lastReset !== today) {
+            localStorage.removeItem('acknowledgedWarnings');
+            localStorage.setItem('ackResetDate', today);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // 一進首頁就查詢庫存
             axios.get('query-stock.php')
                 .then(res => {
                     const data = res.data;
+                    const acknowledged = JSON.parse(localStorage.getItem('acknowledgedWarnings') || '[]');
                     const warnings = [];
 
                     data.forEach(item => {
                         const quantity = Number(item.quantity);
                         const safe = Number(item.safe_quantity);
 
-                        if (quantity < safe) {
-                            warnings.push(`🔴 ${item.name} 剩下 ${quantity}（安全庫存 ${safe}）`);
+                        if (quantity < safe && !acknowledged.includes(item.name)) {
+                            warnings.push({
+                                name: item.name,
+                                quantity: quantity,
+                                safe: safe
+                            });
                         }
                     });
 
                     if (warnings.length > 0) {
                         const content = document.getElementById('stockWarningContent');
-                        content.innerHTML = warnings.map(w => `<p>${w}</p>`).join('');
+                        content.innerHTML = warnings
+                            .map(w => `<p data-name="${w.name}">🔴 ${w.name} 剩下 ${w.quantity}（安全庫存 ${w.safe}）</p>`)
+                            .join('');
                         document.getElementById('stockWarningModal').classList.add('is-active');
                     }
                 })
@@ -98,6 +120,12 @@
                 });
         });
     </script>
+<script>
+fetch('expire_cleanup.php')
+  .then(response => response.text())
+  .then(data => console.log('過期原料已清理'));
+</script>
+
 
 </body>
 </html>
