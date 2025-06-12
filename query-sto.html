@@ -8,21 +8,52 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="stock.css" />
+    <style>
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .toast.success {
+            background-color: #48c774; /* 綠色 - 成功 */
+        }
+
+        .toast.error {
+            background-color: #f14668; /* 紅色 - 錯誤 */
+        }
+    </style>
+
+    </style>
 
 </head>
 <body>
+    <div id="toast" class="toast"></div>
+
     <section class="section">
         <div class="container">
             <h1 class="title">原物料庫存管理</h1>
 
+  <div id="messageToast" class="notification" style="
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      padding: 15px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  ">
+            </div>
+
             <!-- 查詢原物料 -->
             <div class="box">
-                <h2 class="subtitle">查詢原物料</h2>
+                <h2 class="subtitle">查詢種類</h2>
                 <div class="field">
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select id="filterSelect" onchange="filterStock()">
-                                <option value="">全部原物料</option>
+                                <option value="">全部種類</option>
                             </select>
                         </div>
                     </div>
@@ -58,16 +89,17 @@
                     initFilterOptions(fullStock);
                 })
                 .catch(err => {
-                    alert('資料載入失敗');
+                    showToast('資料載入失敗', 'error');
                     console.error(err);
                 });
+
         }
 
         // 初始化下拉選單內容
         function initFilterOptions(data) {
             const select = document.getElementById('filterSelect');
-            select.innerHTML = '<option value="">全部原物料</option>';
-            const names = [...new Set(data.map(item => item.name))];
+            select.innerHTML = '<option value="">全部種類</option>';
+            const names = [...new Set(data.map(item => item.category))];
             names.forEach(name => {
                 const opt = document.createElement('option');
                 opt.value = name;
@@ -76,7 +108,7 @@
             });
         }
 
-        // 渲染表格
+     
         function renderTable(data) {
             const tableBody = document.getElementById('stockTableBody');
             tableBody.innerHTML = '';
@@ -87,16 +119,16 @@
                 if (isLow) tr.classList.add('warning');
 
                 tr.innerHTML = `
-                  <td><input class="input" value="${item.name}" disabled></td>
-                  <td><input class="input" id="cat_${item.name}" value="${item.category}"></td>
-                  <td><input class="input" id="safe_${item.name}" type="number" value="${item.safe_quantity}"></td>
-                  <td><input class="input" id="qty_${item.name}" type="number" value="${item.quantity}"></td>
-                  <td>${isLow ? '⚠️ 過低' : '✔️ 正常'}</td>
-                  <td>
-                    <button class="button is-info" onclick="updateMaterial('${item.name}')">修改</button>
-                    <button class="button is-danger" onclick="deleteMaterial('${item.name}')">刪除</button>
-                  </td>
-                `;
+                      <td><input class="input" value="${item.name}" disabled></td>
+                      <td><input class="input" id="cat_${item.name}" value="${item.category}"></td>
+                      <td><input class="input" id="safe_${item.name}" type="number" value="${item.safe_quantity}"></td>
+                      <td><input class="input" id="qty_${item.name}" type="number" value="${item.quantity}"></td>
+                      <td>${isLow ? '⚠️ 過低' : '✔️ 正常'}</td>
+                      <td>
+                        <button class="button is-info" onclick="updateMaterial('${item.name}')">修改</button>
+                        <button class="button is-danger" onclick="deleteMaterial('${item.name}')">刪除</button>
+                      </td>
+                    `;
                 tableBody.appendChild(tr);
             });
         }
@@ -107,34 +139,106 @@
             if (!selected) {
                 renderTable(fullStock);
             } else {
-                const filtered = fullStock.filter(item => item.name === selected);
+                const filtered = fullStock.filter(item => item.category === selected);
                 renderTable(filtered);
             }
+        }
+
+        let messageTimer = null;
+
+        function showMessage(message, type = 'info') {
+            const toast = document.getElementById('messageToast');
+            toast.textContent = message;
+
+            //設定樣式
+            if (type === 'success') {
+                toast.style.backgroundColor = '#d4edda';  // 淡綠
+                toast.style.color = '#155724';
+            } else if (type === 'error') {
+                toast.style.backgroundColor = '#f8d7da';  // 淡紅
+                toast.style.color = '#721c24';
+            } else {
+                toast.style.backgroundColor = '#f0f0f0';  // 默認
+                toast.style.color = '#000';
+            }
+
+            toast.style.display = 'block';
+
+          
+            if (messageTimer) clearTimeout(messageTimer);
+
+            // 設定2秒後自動隱藏
+            messageTimer = setTimeout(() => {
+                toast.style.display = 'none';
+                messageTimer = null;
+            }, 2000);
         }
 
         // 初始化讀取資料
         loadStock();
 
         // 修改資料
-        function updateMaterial(name) {
-            const safe = document.getElementById(`safe_${name}`).value;
-            const cat = document.getElementById(`cat_${name}`).value;
-            const qty = document.getElementById(`qty_${name}`).value;
+       function updateMaterial(name) {
+    const safe = document.getElementById(`safe_${name}`).value.trim();
+    const cat = document.getElementById(`cat_${name}`).value.trim();
+    const qty = document.getElementById(`qty_${name}`).value.trim();
 
-            axios.post('update-sto.php', {
-                name,
-                safe_quantity: safe,
-                category: cat,
-                quantity: qty
-            }).then(res => {
-                if (res.data.success) {
-                    alert('修改成功');
-                    loadStock();
-                } else {
-                    alert('修改失敗: ' + (res.data.error || ''));
-                }
-            });
+    // 只允許中英文
+    const textPattern = /^[\u4e00-\u9fa5a-zA-Z0-9\x20]+$/;
+    const catTrim = cat.trim();
+
+    if (catTrim.length === 0) {
+        showMessage('種類不能是空白', 'error');
+        return;
+    }
+
+    if (catTrim === "0") {
+        showMessage('種類不能是 0', 'error');
+        return;
+    }
+
+    if (!textPattern.test(catTrim)) {
+        showMessage('種類只能包含中英文，不能包含特殊符號', 'error');
+        return;
+    }
+
+    if (/^\d+$/.test(catTrim)) {
+        showMessage('種類不能全部是數字', 'error');
+        return;
+    }
+
+    // 防呆->不可為負
+    const safeNum = Number(safe);
+    const qtyNum = Number(qty);
+
+    if (isNaN(safeNum) || safeNum < 0) {
+        showMessage('安全庫存必須為非負數字', 'error');
+        return;
+    }
+
+    if (isNaN(qtyNum) || qtyNum < 0) {
+        showMessage('目前庫存必須為非負數字', 'error');
+        return;
+    }
+
+    // 送出更新
+    axios.post('update-sto.php', {
+        name,
+        safe_quantity: safeNum,
+        category: catTrim,
+        quantity: qtyNum
+    }).then(res => {
+        if (res.data.success) {
+            showMessage('修改成功', 'success');
+            loadStock();
+        } else {
+            showMessage('修改失敗: ' + (res.data.error || ''), 'error');
         }
+    }).catch(() => {
+        showMessage('修改請求失敗', 'error');
+    });
+}
+
 
         // 刪除資料
         function deleteMaterial(name) {
@@ -142,12 +246,16 @@
             axios.post('delete-sto.php', { name })
                 .then(res => {
                     if (res.data.success) {
-                        alert('刪除成功');
+                        showMessage('刪除成功', 'success');
                         loadStock();
                     } else {
-                        alert('刪除失敗: ' + (res.data.error || ''));
+                        showMessage('刪除失敗: ' + (res.data.error || ''), 'error');
                     }
+                })
+                .catch(err => {
+                    showMessage('刪除過程中出錯', 'error');
                 });
+
         }
 
         document.addEventListener('DOMContentLoaded', loadStock);

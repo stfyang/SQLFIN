@@ -15,11 +15,11 @@
 
     .home-button:hover {
         background-color: #000;
-        transform: scale(1.12); 
+        transform: scale(1.12); /* 放大動畫 */
     }
 
 body {
-    background-image: url('背景圖.jpg');
+    background-image: url('背景圖.jpg'); 
     background-size: cover;
     background-position: center;
     height: 100vh;
@@ -41,13 +41,16 @@ body {
         z-index: -1;
     }
 
-.menu-container {
+body .menu-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
     background-color: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 960px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    
 }
 
 .title {
@@ -60,10 +63,11 @@ body {
 
 .menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   grid-template-columns: repeat(3, 1fr);
+
     gap: 2rem;
-    justify-items: center;
 }
+
 
 .menu-button {
     background-color: #ffe164;
@@ -74,10 +78,9 @@ body {
     font-size: 1.6rem;
     transition: all 0.2s;
     cursor: pointer;
-    width: 100%;
-    white-space: nowrap;
-    max-width: 240px;
+  
 }
+
 
     .menu-button:hover {
         background-color: #ffd700;

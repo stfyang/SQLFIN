@@ -6,6 +6,49 @@
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="book.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+    body {
+        background-color: #fffdf5; /* 整體淡黃底 */
+    }
+
+    .section {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    table.table.is-striped tbody tr:nth-child(odd) {
+        background-color: #fff9e6; /* 淡黃 */
+    }
+
+    table.table.is-striped tbody tr:nth-child(even) {
+        background-color: #ffffff; /* 白色 */
+    }
+
+    .modal-card {
+        background-color: #fffdf5;
+    }
+
+    .notification {
+        border: 1px solid #ffeeba;
+    }
+
+    .modal-card-head, .modal-card-foot {
+        background-color: #fff3cd;
+    }
+
+    .input, .select select, .button {
+        background-color: #fffef5;
+    }
+
+    .home-button {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+    }
+</style>
+
 </head>
 <body>
     <section class="section">
@@ -13,7 +56,8 @@
             <h1 class="title">菜單管理</h1>
             <button class="button is-primary mb-4" onclick="openModal()">新增菜品</button>
 
-            <table class="table is-fullwidth is-striped" id="dishTable">
+    <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+             <table class="table is-fullwidth is-striped" id="dishTable">
                 <thead>
                     <tr>
                         <th>菜品名稱</th>
@@ -25,9 +69,24 @@
                 <tbody></tbody>
             </table>
         </div>
+    </div>
     </section>
 
-    <!-- Modal -->
+    <!-- 自動消失提示訊息 -->
+    <div id="messageToast" class="notification" style="
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 15px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+">
+    </div>
+
+
     <div class="modal" id="dishModal">
         <div class="modal-background" onclick="closeModal()"></div>
         <div class="modal-card">
@@ -38,11 +97,16 @@
             <section class="modal-card-body">
                 <input type="hidden" id="dishId" />
                 <div class="field">
-                    <label class="label">菜品名稱</label>
-                    <div class="control">
-                        <input class="input" type="text" id="dishName" placeholder="例如：炒飯" />
-                    </div>
+  <label class="label">菜品名稱</label>
+                <div class="control">
+                    <input class="input" type="text" id="dishName" placeholder="例如：炒飯" 
+                        pattern="^(?!\d+$)[\u4e00-\u9fa5a-zA-Z0-9\s]{1,20}$"
+                        title="請輸入1~20個中英文" 
+                        required />
                 </div>
+  <p id="dishNameError" class="help is-danger" style="display: none;">格式錯誤：僅限中英文和數字，不能是純數字</p>
+</div>
+
                 <div class="field">
                     <label class="label">單價</label>
                     <div class="control">
@@ -70,7 +134,7 @@
             try {
                 const res = await fetch('get_materials.php');
                 materials = await res.json();
-                console.log("原物料資料：", materials); // 加這行看看拿到什麼
+                console.log("原物料資料：", materials);
             } catch (err) {
                 alert('無法取得原物料：' + err.message);
             }
@@ -94,14 +158,14 @@
             dishes.forEach(dish => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${dish.name}</td>
-                    <td>${dish.price}</td>
-                    <td>${dish.materials.map(m => `${m.material_name} x ${m.quantity}`).join('<br>')}</td>
-                    <td>
-                          <button class="button is-small is-info" onclick="editDishByName('${dish.name}')">修改</button>
-                          <button class="button is-small is-danger" onclick="deleteDishByName('${dish.name}')">刪除</button>
-                    </td>
-                    `;
+                            <td>${dish.name}</td>
+                            <td>${dish.price}</td>
+                            <td>${dish.materials.map(m => `${m.material_name} x ${m.quantity}`).join('<br>')}</td>
+                            <td>
+                                  <button class="button is-small is-info" onclick="editDishByName('${dish.name}')">修改</button>
+                                  <button class="button is-small is-danger" onclick="deleteDishByName('${dish.name}')">刪除</button>
+                            </td>
+                            `;
 
                 tbody.appendChild(tr);
             });
@@ -112,20 +176,20 @@
             const div = document.createElement('div');
             div.className = 'field is-grouped mb-2';
             div.innerHTML = `
-                    <div class="control is-expanded">
-                      <div class="select is-fullwidth">
-                        <select name="material[]" required>
-                          ${materials.map(name => `<option value="${name}" ${selectedName === name ? 'selected' : ''}>${name}</option>`).join('')}
-                        </select>
-                      </div>
-                    </div>
-                    <div class="control">
-                      <input class="input" type="number" name="quantity[]" placeholder="數量" step="0.01" value="${quantity}" required />
-                    </div>
-                    <div class="control">
-                      <button class="button is-danger" type="button" onclick="this.closest('.field').remove()">✖</button>
-                    </div>
-                  `;
+                            <div class="control is-expanded">
+                              <div class="select is-fullwidth">
+                                <select name="material[]" required>
+                                  ${materials.map(name => `<option value="${name}" ${selectedName === name ? 'selected' : ''}>${name}</option>`).join('')}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="control">
+                              <input class="input" type="number" name="quantity[]" placeholder="數量" step="0.01" value="${quantity}" required />
+                            </div>
+                            <div class="control">
+                              <button class="button is-danger" type="button" onclick="this.closest('.field').remove()">✖</button>
+                            </div>
+                          `;
             document.getElementById('materialList').appendChild(div);
         }
 
@@ -143,9 +207,45 @@
             document.getElementById('dishModal').classList.remove('is-active');
         }
 
+        let messageTimer = null;
+
+        function showMessage(message, type = 'info') {
+            const toast = document.getElementById('messageToast');
+            toast.textContent = message;
+
+            // 設定樣式
+            if (type === 'success') {
+                toast.style.backgroundColor = '#d4edda';  
+                toast.style.color = '#155724';
+            } else if (type === 'error') {
+                toast.style.backgroundColor = '#f8d7da';  
+                toast.style.color = '#721c24';
+            } else {
+                toast.style.backgroundColor = '#f0f0f0';  
+                toast.style.color = '#000';
+            }
+
+            toast.style.display = 'block';
+
+            
+            if (messageTimer) clearTimeout(messageTimer);
+
+            //2秒後自動隱藏
+            messageTimer = setTimeout(() => {
+                toast.style.display = 'none';
+                messageTimer = null;
+            }, 2000);
+        }
+
+
+
+        function closeMessageModal() {
+            document.getElementById('messageModal').classList.remove('is-active');
+        }
+
         function editDishByName(name) {
             const dish = dishes.find(d => d.name === name);
-            if (!dish) return alert('找不到該菜品');
+            if (!dish) return showMessage('找不到該菜品', 'error');
 
             document.getElementById('modalTitle').textContent = '編輯菜品';
             document.getElementById('dishId').value = dish.name;
@@ -158,52 +258,57 @@
         }
 
         async function submitDish() {
-            const id = document.getElementById('dishId').value;
-            const name = document.getElementById('dishName').value.trim();
-            const price = parseFloat(document.getElementById('dishPrice').value);
+    const id = document.getElementById('dishId').value;
+    const name = document.getElementById('dishName').value.trim();
+    const price = parseFloat(document.getElementById('dishPrice').value);
 
-            if (!name) return alert('請輸入菜品名稱');
-            if (!price || price <= 0) return alert('請輸入正確的價格');
+    // 防呆->名稱格式驗證（限制中英文）
+    const namePattern = /^(?!\d+$)[\u4e00-\u9fa5a-zA-Z0-9\s]{1,20}$/;
+    if (!namePattern.test(name)) {
+        return showMessage('名稱格式錯誤：僅限中英文', 'error');
+    }
 
-            const materialsSelects = Array.from(document.querySelectorAll('#materialList select[name="material[]"]'));
-            const quantitiesInput = Array.from(document.querySelectorAll('#materialList input[name="quantity[]"]'));
+    if (!price || price <= 0) return showMessage('請輸入正確的價格', 'error');
 
-            let materialsData = [];
-            for (let i = 0; i < materialsSelects.length; i++) {
-                const material_name = materialsSelects[i].value;
-                const quantity = parseFloat(quantitiesInput[i].value);
-                if (!material_name || !quantity || quantity <= 0) {
-                    return alert('請確認所有原物料與數量都填寫正確');
-                }
-                materialsData.push({ material_name, quantity });
-            }
+    const materialsSelects = Array.from(document.querySelectorAll('#materialList select[name="material[]"]'));
+    const quantitiesInput = Array.from(document.querySelectorAll('#materialList input[name="quantity[]"]'));
 
-            const payload = { name, price, materials: materialsData };
-            let url = 'add_dish.php';
-
-            if (id) {
-                url = 'update_dish.php';
-                payload.old_name = id; // 使用舊的名稱當成識別
-            }
-
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert('儲存成功');
-                    closeModal();
-                    await fetchDishes();
-                } else {
-                    alert('儲存失敗：' + result.error);
-                }
-            } catch (error) {
-                alert('儲存錯誤：' + error.message);
-            }
+    let materialsData = [];
+    for (let i = 0; i < materialsSelects.length; i++) {
+        const material_name = materialsSelects[i].value;
+        const quantity = parseFloat(quantitiesInput[i].value);
+        if (!material_name || !quantity || quantity <= 0) {
+            return showMessage('請確認所有原物料與數量都填寫正確', 'error');
         }
+        materialsData.push({ material_name, quantity });
+    }
+
+    const payload = { name, price, materials: materialsData };
+    let url = 'add_dish.php';
+
+    if (id) {
+        url = 'update_dish.php';
+        payload.old_name = id; // 使用舊的名稱當成識別
+    }
+
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await res.json();
+        if (result.success) {
+            showMessage('儲存成功', 'success');
+            closeModal();
+            await fetchDishes();
+        } else {
+            showMessage('儲存失敗：' + result.error, 'error');
+        }
+    } catch (error) {
+        showMessage('儲存錯誤：' + error.message, 'error');
+    }
+}
 
         async function deleteDishByName(name) {
             if (!confirm('確定要刪除「' + name + '」嗎？')) return;
@@ -216,13 +321,13 @@
                 });
                 const result = await res.json();
                 if (result.success) {
-                    alert('刪除成功');
+                    showMessage('刪除成功', 'success');
                     await fetchDishes();
                 } else {
-                    alert('刪除失敗：' + result.error);
+                    showMessage('刪除失敗：' + result.error, 'error');
                 }
             } catch (err) {
-                alert('錯誤：' + err.message);
+                showMessage('錯誤：' + err.message, 'error');
             }
         }
 

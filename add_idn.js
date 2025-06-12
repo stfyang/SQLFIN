@@ -1,83 +1,102 @@
+//供應商新增相關
 document.addEventListener('DOMContentLoaded', () => {
-  const modal = document.getElementById('addSupplierModal');
-  const openBtn = document.getElementById('openAddSupplierBtn');
-  const closeBtn = document.getElementById('closeModalBtn');
-  const cancelBtn = document.getElementById('cancelModalBtn');
-  const saveBtn = document.getElementById('saveSupplierBtn');
-  const queryBtn = document.getElementById('querySupplierBtn'); // 🔍 新增查詢按鈕
+    const addBtn = document.getElementById('saveSupplierBtn');
+    const openBtn = document.getElementById('openAddSupplierBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelModalBtn');
+    const modal = document.getElementById('addSupplierModal');
+    const messageBox = document.getElementById('message-box');
 
-  openBtn.addEventListener('click', () => modal.classList.add('is-active'));
-  closeBtn.addEventListener('click', () => modal.classList.remove('is-active'));
-  cancelBtn.addEventListener('click', () => modal.classList.remove('is-active'));
+    openBtn.addEventListener('click', () => modal.classList.add('is-active'));
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
 
-  saveBtn.addEventListener('click', () => {
-  const name = document.getElementById('supplierName').value.trim();
-  const phone = document.getElementById('supplierPhone').value.trim();
+    addBtn.addEventListener('click', async () => {
+    const nameInput = document.getElementById('supplierName');
+    const phoneInput = document.getElementById('supplierPhone');
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
 
-  if (!name || !phone) {
-    alert('請填寫所有欄位');
-    return;
-  }
-
-  axios.post('add-idn.php', { name, phone })
-    .then(res => {
-      if (res.data.success) {
-        alert(res.data.message || '新增成功');
-        modal.classList.remove('is-active');
-        document.getElementById('supplierName').value = '';
-        document.getElementById('supplierPhone').value = '';
-      } else {
-        alert(res.data.message || '新增失敗');
-      }
-    })
-    .catch(err => {
-      // 檢查是否是重複名稱錯誤（MySQL error 1062）
-      if (err.response && err.response.data && err.response.data.error) {
-        if (err.response.data.error.includes('Duplicate entry')) {
-          alert('名稱已存在，請使用其他名稱');
-        } else {
-          alert('新增失敗: ' + err.response.data.error);
-        }
-      } else {
-        alert('新增失敗，請稍後再試');
-      }
-      console.error(err);
-    });
-});
-
-  
-
-  // 🔍 查詢供應商功能
-  queryBtn.addEventListener('click', () => {
-    const name = document.getElementById('supplierName').value.trim();
-
-    if (!name) {
-      alert('請輸入要查詢的供應商名稱');
-      return;
+    // 防呆->不能為空
+    if (!name || !phone) {
+        showMessage('❌ 請輸入正確名稱與電話', 'error');
+        return;
     }
 
-    axios.post('query-idn.php', { name })
-      .then(res => {
-        if (res.data.length > 0) {
-          const supplier = res.data[0]; // 假設只取第一筆
-          alert(`供應商：${supplier.名稱}\n電話：${supplier.電話}`);
+    // 防呆->名稱不能只有符號或空白
+    if (!/^[\u4e00-\u9fa5a-zA-Z0-9\s]+$/.test(name)) {
+        showMessage('❌ 名稱不可包含特殊符號', 'error');
+        return;
+    }
+
+    // 防呆->電話格式檢查
+    if (!/^0\d{7,9}$/.test(phone)) {
+    showMessage('❌ 電話格式錯誤，請輸入 8~10 碼的市內電話或手機號碼', 'error');
+    return;
+}
+
+
+        
+
+    // 防呆->防止重複
+    addBtn.disabled = true;
+    addBtn.textContent = '儲存中...';
+
+    try {
+        const response = await fetch('add-idn.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            showMessage('✅ ' + result.message, 'success');
+            closeModal();
         } else {
-          alert('查無資料');
+            showMessage('❌ ' + (result.message || '新增失敗'), 'error');
         }
-      })
-      .catch(err => {
-        alert('查詢失敗');
-        console.error(err);
-      });
-  });
-
-  function updateTime() {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('time').innerText = `${hours}:${minutes}`;
-  }
-
-  setInterval(updateTime, 1000);
-  updateTime();
+    } catch (err) {
+        showMessage('❌ 發生錯誤，請稍後再試', 'error');
+    } finally {
+        addBtn.disabled = false;
+        addBtn.textContent = '儲存';
+    }
 });
+
+//通知設定
+    function showMessage(message, type) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+
+        if (type === 'success') {
+            toast.style.backgroundColor = '#d4edda';  
+            toast.style.color = '#155724';
+        } else if (type === 'error') {
+            toast.style.backgroundColor = '#f8d7da'; 
+            toast.style.color = '#721c24';
+        } else {
+            toast.style.backgroundColor = '#fefefe';
+            toast.style.color = '#333';
+        }
+
+        toast.style.display = 'block';
+        toast.style.opacity = '1';
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 300);
+        }, 3000);
+    }
+
+
+    function closeModal() {
+        document.getElementById('supplierName').value = '';
+        document.getElementById('supplierPhone').value = '';
+        modal.classList.remove('is-active');
+    }
+});
+

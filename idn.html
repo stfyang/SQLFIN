@@ -5,8 +5,9 @@
   <title>供應商管理功能</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <script src="jump.js" defer></script>
-  <script src="add_idn.js"></script>
-  <script src="query_idn.js"></script>
+  <script src="add_idn.js" defer></script>
+
+  <script src="query_idn.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="stylesheet" href="book.css">
 
@@ -14,65 +15,80 @@
   
 </head>
 <body>
-  <div class="menu-container has-text-centered">
-    <div class="title">供應商管理功能</div>
-    <div class="menu-grid">
-      <div class="menu-button" id="openAddSupplierBtn">
-        <i class="fas fa-plus"></i><br>新增供應商
-      </div>
-      <div class="menu-button" id="querySupplierBtn">
-        <i class="fas fa-search"></i><br>檢視供應商
-      </div>
-    </div>
-  </div>
-  
-  
+    <div id="message-box" class="notification is-hidden"></div>
 
-  <div class="bottom-right-time" id="time"></div>
-  <a href="index.html" class="button is-small is-dark home-button">
+    <div id="toast" style="
+       position: fixed;
+       top: 20px;
+       right: 20px;
+       z-index: 1000;
+       padding: 1rem 1.5rem;
+       border-radius: 5px;
+       display: none;
+       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+       font-weight: bold;
+    "></div>
+
+    <div class="menu-container has-text-centered">
+        <div class="title">供應商管理功能</div>
+        <div class="menu-grid">
+            <div class="menu-button" id="openAddSupplierBtn">
+                <i class="fas fa-plus"></i><br>新增供應商
+            </div>
+            <div class="menu-button" id="querySupplierBtn">
+                <i class="fas fa-search"></i><br>檢視供應商
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="bottom-right-time" id="time"></div>
+    <a href="index.html" class="button is-small is-dark home-button">
         <i class="fas fa-home"></i>&nbsp;
         首頁
     </a>
-  <script>
-    function updateTime() {
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      document.getElementById('time').innerText = `${hours}:${minutes}`;
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
-  </script>
+  
 
-
-<!-- 新增供應商 Modal -->
-  <div class="modal" id="addSupplierModal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">新增供應商</p>
-        <button class="delete" aria-label="close" id="closeModalBtn"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="field">
-          <label class="label">供應商名稱</label>
-          <div class="control">
-            <input class="input" type="text" id="supplierName" placeholder="請輸入名稱">
-          </div>
+    <!-- 新增供應商-->
+    <div class="modal" id="addSupplierModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">新增供應商</p>
+                <button class="delete" aria-label="close" id="closeModalBtn"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">供應商名稱</label>
+                    <div class="control">
+                        <input class="input" type="text" id="supplierName" placeholder="請輸入名稱">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">電話</label>
+                    <div class="control">
+                        <input class="input" type="text" id="supplierPhone" placeholder="請輸入電話">
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" id="saveSupplierBtn">儲存</button>
+                <button class="button" id="cancelModalBtn">取消</button>
+            </footer>
         </div>
-        <div class="field">
-          <label class="label">電話</label>
-          <div class="control">
-            <input class="input" type="text" id="supplierPhone" placeholder="請輸入電話">
-          </div>
-        </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button class="button is-success" id="saveSupplierBtn">儲存</button>
-        <button class="button" id="cancelModalBtn">取消</button>
-      </footer>
     </div>
-  </div>
+  <script>
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+    </script>
 
 </body>
 </html>

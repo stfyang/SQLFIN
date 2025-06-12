@@ -1,4 +1,5 @@
 ﻿<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+//安全庫存
   function closeStockWarningModal() {
     document.getElementById('stockWarningModal').classList.remove('is-active');
   }

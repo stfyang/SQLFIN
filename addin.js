@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // ✅ 正確的 async IIFE（立即執行函式）
+//新增進貨單
   (async () => {
     const openBtn = document.getElementById('openAddPurchaseBtn');
     const modal = document.getElementById('addPurchaseModal');
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
-    // ✅ 載入供應商選單
+    // 供應商選單
     try {
       const response = await axios.get('list_suppliers.php');
       const suppliers = response.data.suppliers;
@@ -51,5 +51,5 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('載入供應商失敗', error);
       alert('無法載入供應商選項');
     }
-  })(); // ✅ 正確的立即執行 async 函式結尾
+  })(); 
 });

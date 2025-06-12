@@ -14,70 +14,144 @@
 
 </head>
 <body>
-  <section class="section">
-    <div class="container">
-      <h1 class="title">供應商列表</h1>
+    <div id="toast" style="
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      padding: 1rem 1.5rem;
+      border-radius: 5px;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-weight: bold;
+    "></div>
 
-      <!-- 查詢欄位 -->
-      <div class="field has-addons">
-        <div class="control">
-          <input id="searchInput" class="input" type="text" placeholder="輸入供應商名稱查詢">
+    <style>
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dbdbdb;
+        }
+
+            .table-container thead th {
+                position: sticky;
+                top: 0;
+                background-color: #f5f5f5;
+                z-index: 1;
+            }
+    </style>
+
+    <section class="section">
+        <div class="container">
+            <h1 class="title">供應商列表</h1>
+
+            <!-- 查詢欄位 -->
+            <div class="field has-addons">
+                <div class="control">
+                    <input id="searchInput" class="input" type="text" placeholder="輸入供應商名稱查詢">
+                </div>
+                <div class="control">
+                    <button id="searchBtn" class="button is-info">查詢</button>
+                </div>
+            </div>
+
+            <!-- 顯示結果 -->
+            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                <table class="table is-striped is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>名稱</th>
+                            <th>電話</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supplierTableBody">
+                        <!-- 資料列動態產生 -->
+                    </tbody>
+                </table>
+            </div>
+
+    </section>
+
+
+    <!-- 修改-->
+    <div id="editSupplierModal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">修改供應商</p>
+                <button class="delete" aria-label="close" id="closeEditModalBtn"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">供應商名稱（不可修改）</label>
+                    <div class="control">
+                        <input id="editSupplierName" class="input" type="text" readonly>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">電話</label>
+                    <div class="control">
+                        <input id="editSupplierPhone" class="input" type="text">
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button id="saveEditBtn" class="button is-success">儲存</button>
+                <button id="cancelEditModalBtn" class="button">取消</button>
+            </footer>
         </div>
-        <div class="control">
-          <button id="searchBtn" class="button is-info">查詢</button>
-        </div>
-      </div>
-
-      <!-- 顯示結果 -->
-      <table class="table is-striped is-fullwidth">
-      <thead>
-        <tr>
-          <th>名稱</th>
-          <th>電話</th>
-          <th>操作</th> <!-- ✅ 加這欄 -->
-        </tr>
-      </thead>
-
-
-        <tbody id="supplierTableBody">
-          <!-- 資料列會動態產生 -->
-        </tbody>
-      </table>
     </div>
-  </section>
-
-
-  <!-- 修改 Modal -->
-  <div id="editSupplierModal" class="modal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">修改供應商</p>
-        <button class="delete" aria-label="close" id="closeEditModalBtn"></button>
-      </header>
-      <section class="modal-card-body">
-        <div class="field">
-          <label class="label">名稱（主鍵，不可修改）</label>
-          <div class="control">
-            <input id="editSupplierName" class="input" type="text" readonly>
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">電話</label>
-          <div class="control">
-            <input id="editSupplierPhone" class="input" type="text">
-          </div>
-        </div>
-      </section>
-      <footer class="modal-card-foot">
-        <button id="saveEditBtn" class="button is-success">儲存</button>
-        <button id="cancelEditModalBtn" class="button">取消</button>
-      </footer>
-    </div>
-  </div>
-  <a href="index.html" class="button is-small is-dark home-button">
+    <a href="index.html" class="button is-small is-dark home-button">
         <i class="fas fa-home"></i>&nbsp;
         首頁
     </a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchBtn = document.getElementById('searchBtn');
+            const searchInput = document.getElementById('searchInput');
+            const supplierTableBody = document.getElementById('supplierTableBody');
+
+            searchBtn.addEventListener('click', () => {
+                const name = searchInput.value.trim();
+
+                if (!name) {
+                    alert('請輸入要查詢的供應商名稱');
+                    return;
+                }
+
+                axios.post('query-idn.php', { name })
+                    .then(res => {
+                        const data = res.data;
+                        supplierTableBody.innerHTML = ''; // 清空舊資料
+
+                        if (data.length === 0) {
+                            supplierTableBody.innerHTML = `
+                                       <tr><td colspan="3">查無資料</td></tr>
+                                    `;
+                            return;
+                        }
+
+                        data.forEach(supplier => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                      <td>${supplier.供應商名稱}</td>
+                                      <td>${supplier.電話}</td>
+                                      <td>
+                                         <button class="button is-small is-warning">修改</button>
+                                         <button class="button is-small is-danger">刪除</button>
+                                      </td>
+                                      `;
+                            supplierTableBody.appendChild(row);
+                        });
+                    })
+                    .catch(err => {
+                        alert('查詢失敗');
+                        console.error(err);
+                    });
+            });
+        });
+    </script>
 </body>
 </html>

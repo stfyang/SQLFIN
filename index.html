@@ -5,34 +5,36 @@
     <title>餐廳管理系統</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-   <script src="jump.js" defer></script>
-   <link rel="stylesheet" href="book.css">
+    <script src="jump.js" defer></script>
+    <link rel="stylesheet" href="main.css">
 
 
 </head>
+
 <body>
     <div class="menu-container has-text-centered">
-        <div class="title">餐廳管理系統</div>
-        <div class="menu-grid">
-            <div class="menu-button" onclick="點餐(event)">
-                <i class="fas fa-pen"></i><br>點餐功能
-            </div>
-            <div class="menu-button" onclick="菜單(event)">
-                <i class="fas fa-utensils"></i><br>菜單功能
-            </div>
-            <div class="menu-button" onclick="庫存(event)">
-                <i class="fas fa-warehouse"></i><br>庫存功能
-            </div>
-            <div class="menu-button" onclick="進貨(event)">
-                <i class="fas fa-dolly"></i><br>進貨管理功能
-            </div>
-            <div class="menu-button" onclick="供應商(event)">
-                <i class="fas fa-user-tie"></i><br>供應商管理功能
-            </div>
-            <div class="menu-button" onclick="營運分析(event)">
-                <i class="fas fa-chart-line"></i><br>營運分析
-            </div>
-        </div>
+        <div class="title">日光義廚管理系統</div>
+       <div class="menu-grid">
+    <div class="menu-button" onclick="點餐(event)">
+        <i class="fas fa-pen"></i><br>點餐功能
+    </div>
+    <div class="menu-button" onclick="菜單(event)">
+        <i class="fas fa-utensils"></i><br>菜單功能
+    </div>
+    <div class="menu-button" onclick="庫存(event)">
+        <i class="fas fa-warehouse"></i><br>庫存功能
+    </div>
+    <div class="menu-button" onclick="進貨(event)">
+        <i class="fas fa-dolly"></i><br>進貨管理功能
+    </div>
+    <div class="menu-button" onclick="供應商(event)">
+        <i class="fas fa-user-tie"></i><br>供應商管理
+    </div>
+    <div class="menu-button" onclick="營運分析(event)">
+        <i class="fas fa-chart-line"></i><br>營運分析
+    </div>
+</div>
+
     </div>
 
     <div class="bottom-right-time" id="time"></div>
@@ -48,7 +50,7 @@
         updateTime();
     </script>
 
-    <!-- ⚠️ 庫存預警 Modal -->
+    <!-- 庫存預警-->
     <div class="modal" id="stockWarningModal">
         <div class="modal-background"></div>
         <div class="modal-card">
@@ -57,7 +59,7 @@
                 <button class="delete" aria-label="close" onclick="closeStockWarningModal()"></button>
             </header>
             <section class="modal-card-body" id="stockWarningContent">
-                <!-- 預警內容會自動插入 -->
+                <!-- 預警內容自動插入 -->
             </section>
             <footer class="modal-card-foot">
                 <button class="button is-danger" onclick="closeStockWarningModal()">我知道了</button>
@@ -72,14 +74,14 @@
             const newWarnings = Array.from(document.querySelectorAll('#stockWarningContent p'))
                 .map(p => p.dataset.name);
 
-            // 合併並去重
+            // 合併去重
             const updatedAcknowledged = Array.from(new Set([...acknowledged, ...newWarnings]));
 
             localStorage.setItem('acknowledgedWarnings', JSON.stringify(updatedAcknowledged));
             document.getElementById('stockWarningModal').classList.remove('is-active');
         }
 
-        // 清除過期的已提醒紀錄（每天重置）
+        // 檢查過期的已提醒紀錄->一天一次
         const today = new Date().toISOString().slice(0, 10);
         const lastReset = localStorage.getItem('ackResetDate');
         if (lastReset !== today) {
@@ -120,11 +122,11 @@
                 });
         });
     </script>
-<script>
-fetch('expire_cleanup.php')
-  .then(response => response.text())
-  .then(data => console.log('過期原料已清理'));
-</script>
+    <script>
+        fetch('expire_cleanup.php')
+            .then(response => response.text())
+            .then(data => console.log('過期原料已清理'));
+    </script>
 
 
 </body>

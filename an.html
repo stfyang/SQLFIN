@@ -2,17 +2,26 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>營運分析</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-        canvas {
-            max-width: 100%;
-        }
+        .chart-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    height: 250px; 
+    position: relative;
+}
+
+canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
 
         .home-button {
             position: fixed;
@@ -22,121 +31,208 @@
             background-color: #444;
             color: white;
             border-radius: 1.5rem;
-            font-size: 2rem; /*  更大字體 */
-            padding: 1.2rem 2.5rem; /*  更大內距 */
+            font-size: 2rem;
+            padding: 1.2rem 2.5rem;
             box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
             transition: all 0.2s ease-in-out;
             font-weight: bold;
         }
-
-            .home-button:hover {
-                background-color: #000;
-                transform: scale(1.12); /* 放大動畫 */
-            }
-
+        .home-button:hover {
+            background-color: #000;
+            transform: scale(1.12);
+        }
     </style>
 </head>
 <body>
-    <section class="section">
-        <div class="container">
-            <!-- 返回首頁按鈕 -->
-            <a href="index.html" class="button is-small is-dark home-button">
-                <i class="fas fa-home"></i>&nbsp; 首頁
-            </a>
+<section class="section">
+    <div class="container">
+        <a href="index.html" class="button is-small is-dark home-button">
+            <i class="fas fa-home"></i>&nbsp; 首頁
+        </a>
 
-            <h1 class="title has-text-centered">📊 營運分析</h1>
+        <h1 class="title has-text-centered">📊 營運分析</h1>
 
-            <!-- 顯示本月總營收與熱銷品項 -->
-            <div class="notification is-warning has-text-centered">
-                <p id="totalRevenue" class="subtitle has-text-weight-semibold"></p>
-                <p id="bestDish" class="subtitle has-text-weight-semibold"></p>
-            </div>
-
-            <!-- 銷售圖表 -->
-            <div class="box">
-                <canvas id="salesChart" height="100"></canvas>
-            </div>
-
-            <div class="box mt-5">
-                <canvas id="dishSalesChart" height="100"></canvas>
-            </div>
+        <div class="notification is-warning has-text-centered">
+            <p id="totalRevenue" class="subtitle has-text-weight-semibold"></p>
+            <p id="profit" class="subtitle has-text-weight-semibold"></p>
+            <p id="bestDish" class="subtitle has-text-weight-semibold"></p>
         </div>
-    </section>
 
-    <script>
-        axios.get('an_data.php').then(res => {
-            const chartData = res.data.chartData;
-            const labels = chartData.map(d => d.日期);
-            const sales = chartData.map(d => d.總銷售);
+        <!-- 每日營收 -->
+        <div class="box chart-container">
+            <canvas id="salesChart"></canvas>
+        </div>
 
-            // 折線圖：每日銷售
-            new Chart(document.getElementById('salesChart'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '每日銷售額',
-                        data: sales,
-                        fill: true,
-                        borderColor: '#f39c12',
-                        backgroundColor: 'rgba(243, 156, 18, 0.2)'
-                    }]
+        <!-- 銷售次數 -->
+        <div class="box mt-5 chart-container">
+            <canvas id="dishSalesChart"></canvas>
+        </div>
+
+        <!-- 各產品利潤分析 -->
+        <div class="box mt-5 chart-container">
+            <canvas id="profitChart"></canvas>
+        </div>
+
+        <!-- 原物料用量 -->
+        <div class="box mt-5 chart-container">
+            <canvas id="materialUsageChart" class="chart"></canvas>
+        </div>
+    </div>
+</section>
+
+<script>
+axios.get('an_data.php').then(res => {
+    const data = res.data;
+
+    document.getElementById('totalRevenue').textContent = `本月總營收：$${data.totalRevenue.toLocaleString()}`;
+    document.getElementById('profit').textContent = `本月總利潤：$${data.profit.toLocaleString()}`;
+    const profitText = document.getElementById('profit');
+    const profitVal = data.profit;
+    profitText.classList.remove('has-text-success', 'has-text-warning', 'has-text-danger');
+    if (profitVal > 5000) {
+        profitText.classList.add('has-text-success');
+    } else if (profitVal >= 0) {
+        profitText.classList.add('has-text-warning');
+    } else {
+        profitText.classList.add('has-text-danger');
+    }
+
+    if (data.bestDish && data.bestDish.菜品名) {
+        document.getElementById('bestDish').textContent = `熱銷品項：${data.bestDish.菜品名}（${data.bestDish.次數} 次）`;
+    } else {
+        document.getElementById('bestDish').textContent = '熱銷品項資料目前無法取得';
+    }
+
+    const dailyLabels = data.chartData.map(item => item.日期);
+    const dailyValues = data.chartData.map(item => parseFloat(item.總銷售));
+    new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: '每日營收',
+                data: dailyValues,
+                fill: true,
+                borderColor: '#00d1b2',
+                backgroundColor: 'rgba(0, 209, 178, 0.2)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '每日營收趨勢'
+                }
+            }
+        }
+    });
+
+    const dishLabels = data.dishSales.map(d => d.菜品名);
+    const dishCounts = data.dishSales.map(d => parseInt(d.次數));
+    new Chart(document.getElementById('dishSalesChart'), {
+        type: 'bar',
+        data: {
+            labels: dishLabels,
+            datasets: [{
+                label: '銷售次數',
+                data: dishCounts,
+                backgroundColor: '#ffdd57'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '各餐點銷售次數'
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '每日銷售趨勢'
-                        }
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    const profitLabels = data.avgCostProfit.map(p => p.菜品名);
+    const profitValues = data.avgCostProfit.map(p => p.利潤);
+    new Chart(document.getElementById('profitChart'), {
+        type: 'bar',
+        data: {
+            labels: profitLabels,
+            datasets: [{
+                label: '菜品利潤 (元)',
+                data: profitValues,
+                backgroundColor: '#48c774'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '各產品單位利潤分析'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `利潤：$${ctx.raw.toFixed(2)}`
                     }
                 }
-            });
-
-            // 總營收 & 熱銷品項
-            document.getElementById('totalRevenue').textContent = `本月總營收：$${res.data.totalRevenue}`;
-            document.getElementById('bestDish').textContent = `熱銷品項：${res.data.bestDish.菜品名}（${res.data.bestDish.次數} 次）`;
-
-            // 長條圖：各餐點銷售次數
-            const dishLabels = res.data.dishSales.map(item => item.菜品名);
-            const dishCounts = res.data.dishSales.map(item => item.次數);
-
-            new Chart(document.getElementById('dishSalesChart'), {
-                type: 'bar',
-                data: {
-                    labels: dishLabels,
-                    datasets: [{
-                        label: '本月各菜品銷售次數',
-                        data: dishCounts,
-                        backgroundColor: 'rgba(243, 156, 18, 0.7)', // 黃色
-                        borderColor: '#f39c12',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '餐點銷售排行榜'
-                        },
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
-            });
-        });
-    </script>
+            }
+        }
+    });
 
+    const materialLabels = Object.keys(data.materialUsage);
+    const materialValues = Object.values(data.materialUsage);
+    const colors = [
+        '#f14668', '#ffdd57', '#00d1b2', '#3273dc', '#b86bff', '#23d160',
+        '#ff3860', '#ffdd99', '#00b89c', '#485fc7', '#9b6aff', '#2ed573'
+    ];
+    new Chart(document.getElementById('materialUsageChart'), {
+        type: 'doughnut',
+        data: {
+            labels: materialLabels,
+            datasets: [{
+                label: '使用量',
+                data: materialValues,
+                backgroundColor: materialLabels.map((_, i) => colors[i % colors.length])
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '原物料使用統計'
+                },
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+}).catch(error => {
+    console.error('資料載入失敗:', error);
+    alert('資料載入失敗，請稍後再試');
+});
+</script>
 </body>
 </html>

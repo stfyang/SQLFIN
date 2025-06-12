@@ -5,86 +5,52 @@
     <title>庫存功能</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
    <script src="jump.js" defer></script>
    <link rel="stylesheet" href="book.css">
 
   
 </head>
 <body>
-      <div class="menu-container has-text-centered">
+
+    <style>
+    .notification.is-light-success {
+    background-color: #e6ffed; /* 淺綠色背景 */
+    color: #256029; /* 深綠文字 */
+    padding: 1rem;
+    border-radius: 6px;
+    }
+
+    .notification.is-light-danger {
+    background-color: #ffeaea; /* 淺紅色背景 */
+    color: #a94442; /* 深紅色文字 */
+    padding: 1rem;
+    border-radius: 6px;
+    }
+
+    </style>
+
+    <div class="menu-container has-text-centered">
         <div class="title">庫存功能</div>
         <div class="menu-grid">
-          <div class="menu-button" onclick="document.getElementById('addStockModal').classList.add('is-active')">
-              <i class="fas fa-plus"></i><br>新增庫存
-          </div>
-          <div class="menu-button" onclick="window.location.href='query-sto.html'">
-              <i class="fas fa-search"></i><br>查詢庫存
-          </div>
-      </div>
-  </div>
+            <div class="menu-button" onclick="document.getElementById('addStockModal').classList.add('is-active')">
+                <i class="fas fa-plus"></i><br>新增庫存
+            </div>
+            <div class="menu-button" onclick="window.location.href='query-sto.html'">
+                <i class="fas fa-search"></i><br>查詢庫存
+            </div>
+        </div>
+    </div>
 
     <div class="bottom-right-time" id="time"></div>
 
-    <script>
-        function updateTime() {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('time').innerText = `${hours}:${minutes}`;
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
-
-        function closeModal() {
-            document.getElementById('addStockModal').classList.remove('is-active');
-            document.getElementById('stockMsgBox').style.display = 'none';
-        }
-
-        function submitAddStock() {
-    const name = document.getElementById('name').value.trim();
-    const category = document.getElementById('category').value.trim();
-    const safe_quantity = parseInt(document.getElementById('safe_quantity').value);
-    const quantity = parseInt(document.getElementById('quantity').value);
-
-    axios.post('add-stock.php', {
-        name, category, safe_quantity, quantity
-    }, {
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => {
-        const box = document.getElementById('stockMsgBox');
-        box.innerText = res.data.message || '新增成功';
-        box.className = 'notification is-success is-light';
-        box.style.display = 'block';
-
-        // ✅ 顯示訊息後延遲 1 秒關閉 modal
-        setTimeout(() => {
-            closeModal(); // 關閉 modal
-            // 清空欄位
-            document.getElementById('name').value = '';
-            document.getElementById('category').value = '';
-            document.getElementById('safe_quantity').value = '';
-            document.getElementById('quantity').value = '';
-        }, 1000);
-    })
-    .catch(err => {
-        const box = document.getElementById('stockMsgBox');
-        box.innerText = '新增失敗';
-        box.className = 'notification is-danger is-light';
-        box.style.display = 'block';
-        console.error(err);
-    });
-}
-
-    </script>
+   
     <a href="index.html" class="button is-small is-dark home-button">
         <i class="fas fa-home"></i>&nbsp;
         首頁
     </a>
 
-    <!-- 新增庫存 Modal -->
+    <!-- 新增庫存 -->
     <div class="modal" id="addStockModal">
         <div class="modal-background"></div>
         <div class="modal-card">
@@ -117,6 +83,113 @@
             </footer>
         </div>
     </div>
+     <script>
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function closeModal() {
+            document.getElementById('addStockModal').classList.remove('is-active');
+            document.getElementById('stockMsgBox').style.display = 'none';
+        }
+
+        function submitAddStock() {
+    const name = document.getElementById('name').value.trim();
+    const category = document.getElementById('category').value.trim();
+    const safe_quantity = parseInt(document.getElementById('safe_quantity').value);
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const box = document.getElementById('stockMsgBox');
+
+    // 只允許中英文
+   const textPattern = /^[\u4e00-\u9fa5a-zA-Z0-9\s]+$/;
+const letterPattern = /[\u4e00-\u9fa5a-zA-Z]/;  // 至少包含中英文
+
+// 原物料名稱驗證
+if (name.length === 0) {
+    box.innerText = '❌ 原物料名稱不能為空';
+    box.className = 'notification is-light-danger';
+    box.style.display = 'block';
+    return;
+} else if (!textPattern.test(name)) {
+    box.innerText = '❌ 原物料名稱不能包含特殊符號';
+    box.className = 'notification is-light-danger';
+    box.style.display = 'block';
+    return;
+} else if (!letterPattern.test(name)) {
+    box.innerText = '❌ 原物料名稱不能只有數字';
+    box.className = 'notification is-light-danger';
+    box.style.display = 'block';
+    return;
+}
+
+// 種類驗證
+if (category.length === 0) {
+    box.innerText = '❌ 種類不能為空';
+    box.className = 'notification is-light-danger';
+    box.style.display = 'block';
+    return;
+} else if (!textPattern.test(category)) {
+    box.innerText = '❌ 種類不能包含特殊符號';
+    box.className = 'notification is-light-danger';
+    box.style.display = 'block';
+    return;
+} else if (!letterPattern.test(category)) {
+    box.innerText = '❌ 種類不能只有數字';
+    box.className = 'notification is-light-danger';
+    box.style.display = 'block';
+    return;
+}
+
+
+    // 數值驗證
+    if (isNaN(safe_quantity) || safe_quantity < 0 || isNaN(quantity) || quantity < 0) {
+        box.innerText = '❌ 請輸入有效的安全庫存和庫存數量（非負整數）';
+        box.className = 'notification is-light-danger';
+        box.style.display = 'block';
+        return;
+    }
+
+    // 清除錯誤訊息
+    box.style.display = 'none';
+
+    // 送出資料
+    axios.post('add-stock.php', {
+        name, category, safe_quantity, quantity
+    }, {
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => {
+        if (res.data.success) {
+            box.innerText = res.data.message || '新增成功';
+            box.className = 'notification is-light-success';
+        } else {
+            box.innerText = res.data.message || '新增失敗';
+            box.className = 'notification is-light-danger';
+        }
+        box.style.display = 'block';
+
+        if (res.data.success) {
+            setTimeout(() => {
+                closeModal();
+                document.getElementById('name').value = '';
+                document.getElementById('category').value = '';
+                document.getElementById('safe_quantity').value = '';
+                document.getElementById('quantity').value = '';
+            }, 1000);
+        } else {
+            setTimeout(() => {
+                box.style.display = 'none';
+            }, 3000);
+        }
+    });
+}
+
+    </script>
 </body>
 </html>
 
